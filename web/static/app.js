@@ -151,28 +151,39 @@ function setupEventListeners() {
 /* ==========================================================================
    Tutorial & Workflow Guide Modal
    ========================================================================== */
+function openGuideModalDirect() {
+  const modal = document.getElementById('guide-modal');
+  if (modal) {
+    document.querySelectorAll('.modal-backdrop').forEach(m => m.style.display = 'none');
+    modal.style.display = 'flex';
+  }
+}
+window.openGuideModalDirect = openGuideModalDirect;
+
+function closeGuideModalDirect() {
+  const modal = document.getElementById('guide-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+window.closeGuideModalDirect = closeGuideModalDirect;
+
 function setupGuideModalEvents() {
   const openBtn = document.getElementById('open-guide-btn');
   const modal = document.getElementById('guide-modal');
   const closeBtn = document.getElementById('guide-modal-close');
   const gotItBtn = document.getElementById('guide-modal-got-it');
 
-  if (openBtn && modal) {
-    openBtn.addEventListener('click', () => {
-      modal.style.display = 'flex';
-    });
+  if (openBtn) {
+    openBtn.addEventListener('click', openGuideModalDirect);
   }
 
-  const closeModal = () => {
-    if (modal) modal.style.display = 'none';
-  };
-
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-  if (gotItBtn) gotItBtn.addEventListener('click', closeModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeGuideModalDirect);
+  if (gotItBtn) gotItBtn.addEventListener('click', closeGuideModalDirect);
 
   if (modal) {
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal();
+      if (e.target === modal) closeGuideModalDirect();
     });
   }
 

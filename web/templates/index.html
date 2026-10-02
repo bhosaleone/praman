@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css?v=0.1.2">
 </head>
 <body class="light-sepia-theme">
   <!-- Toast Notification Container -->
@@ -68,7 +68,7 @@
             <option value="or">ଓଡ଼ିଆ (Odia)</option>
           </select>
         </div>
-        <button type="button" id="open-guide-btn" class="guide-pill-btn" aria-label="Open User Tutorial and Workflow" title="How Praman Works & Workflow Guide">
+        <button type="button" id="open-guide-btn" class="guide-pill-btn" onclick="openGuideModalDirect()" aria-label="Open User Tutorial and Workflow" title="How Praman Works & Workflow Guide">
           <span class="guide-icon">📖</span>
           <span class="guide-btn-text">Tutorial &amp; Workflow</span>
         </button>
@@ -480,6 +480,8 @@
         <textarea id="report-modal-content" class="report-preview-textarea" readonly></textarea>
       </div>
     </div>
+  </div>
+
   <!-- Interactive Tutorial & Workflow Guide Modal -->
   <div id="guide-modal" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="guide-modal-title">
     <div class="modal-card modal-large guide-modal-card">
@@ -574,6 +576,6 @@
     </div>
   </footer>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=0.1.2"></script>
 </body>
 </html>
