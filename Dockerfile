@@ -21,5 +21,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')" || exit 1
 
-# Default command starts the web dashboard
-CMD ["uvicorn", "web.app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default command starts the web dashboard reading dynamic $PORT
+CMD ["python3", "web/app.py"]
