@@ -1,0 +1,15 @@
+{
+  "query": "शेती किती",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "शेती किती",
+    "शेती किती pdf",
+    "शेती किती विनामूल्य",
+    "शेती किती कोणते"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "शेती किती"
+}

@@ -1,0 +1,14 @@
+{
+  "query": "செலவு",
+  "language": "ta",
+  "region": "IN",
+  "suggestions": [
+    "செலவு",
+    "செலவு தகவல்",
+    "செலவு pdf"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "செலவு"
+}

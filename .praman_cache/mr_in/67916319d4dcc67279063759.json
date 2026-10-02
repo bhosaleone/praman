@@ -1,0 +1,14 @@
+{
+  "query": "शेती ज",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "शेती ज",
+    "शेती ज माहिती",
+    "शेती ज pdf"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "शेती ज"
+}

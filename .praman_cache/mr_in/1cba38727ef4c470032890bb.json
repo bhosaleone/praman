@@ -1,0 +1,14 @@
+{
+  "query": "हवामान कसे",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "हवामान कसे",
+    "हवामान कसे माहिती",
+    "हवामान कसे pdf"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "हवामान कसे"
+}

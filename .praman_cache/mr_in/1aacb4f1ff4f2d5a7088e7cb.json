@@ -1,0 +1,14 @@
+{
+  "query": "हवामान फ",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "हवामान फ",
+    "हवामान फ माहिती",
+    "हवामान फ pdf"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "हवामान फ"
+}

@@ -1,0 +1,14 @@
+{
+  "query": "வணக்கம் ல",
+  "language": "ta",
+  "region": "IN",
+  "suggestions": [
+    "வணக்கம் ல",
+    "வணக்கம் ல தகவல்",
+    "வணக்கம் ல pdf"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "வணக்கம் ல"
+}

@@ -1,0 +1,15 @@
+{
+  "query": "शेती का",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "शेती का",
+    "शेती का pdf",
+    "शेती का विनामूल्य",
+    "शेती का काय"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "शेती का"
+}

@@ -1,0 +1,14 @@
+{
+  "query": "crop insurance x",
+  "language": "en",
+  "region": "IN",
+  "suggestions": [
+    "crop insurance x",
+    "crop insurance x guide",
+    "crop insurance x pdf"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "crop insurance x"
+}

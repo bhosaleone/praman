@@ -1,0 +1,17 @@
+{
+  "query": "हवामान",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "हवामान",
+    "हवामान उदाहरण",
+    "हवामान 2026",
+    "हवामान काय",
+    "हवामान pdf",
+    "हवामान online"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "हवामान"
+}

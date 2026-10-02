@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  praman-web:
+    build: .
+    container_name: praman_app
+    ports:
+      - "8000:8000"
+    environment:
+      - PRAMAN_ENV=production
+    volumes:
+      - ./data:/app/data
+      - ./cache:/app/cache
+      - ./reports:/app/reports
+    restart: unless-stopped

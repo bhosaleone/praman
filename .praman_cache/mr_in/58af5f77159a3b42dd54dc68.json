@@ -1,0 +1,14 @@
+{
+  "query": "हवामान तुलना",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "हवामान तुलना",
+    "हवामान तुलना माहिती",
+    "हवामान तुलना pdf"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "हवामान तुलना"
+}

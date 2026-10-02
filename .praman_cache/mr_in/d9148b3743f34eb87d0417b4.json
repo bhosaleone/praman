@@ -1,0 +1,14 @@
+{
+  "query": "हवामान द",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "हवामान द",
+    "हवामान द माहिती",
+    "हवामान द pdf"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "हवामान द"
+}

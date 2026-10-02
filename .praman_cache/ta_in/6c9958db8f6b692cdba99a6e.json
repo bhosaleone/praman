@@ -1,0 +1,15 @@
+{
+  "query": "வணக்கம் தகவல்",
+  "language": "ta",
+  "region": "IN",
+  "suggestions": [
+    "வணக்கம் தகவல்",
+    "வணக்கம் தகவல் pdf",
+    "வணக்கம் தகவல் இலவச",
+    "வணக்கம் தகவல் எப்போது"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "வணக்கம் தகவல்"
+}

@@ -1,0 +1,16 @@
+{
+  "query": "हवामान कुठे",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "हवामान कुठे",
+    "हवामान कुठे विनामूल्य",
+    "हवामान कुठे उदाहरण",
+    "हवामान कुठे कसे",
+    "हवामान कुठे 2026"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "हवामान कुठे"
+}

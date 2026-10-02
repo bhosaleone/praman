@@ -1,0 +1,15 @@
+{
+  "query": "शेती कुठे",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "शेती कुठे",
+    "शेती कुठे pdf",
+    "शेती कुठे विनामूल्य",
+    "शेती कुठे का"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "शेती कुठे"
+}

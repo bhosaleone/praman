@@ -1,0 +1,15 @@
+{
+  "query": "शेती कोणते",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "शेती कोणते",
+    "शेती कोणते pdf",
+    "शेती कोणते विनामूल्य",
+    "शेती कोणते कधी"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "शेती कोणते"
+}

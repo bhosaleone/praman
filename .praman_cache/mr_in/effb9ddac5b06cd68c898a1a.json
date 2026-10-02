@@ -1,0 +1,14 @@
+{
+  "query": "शेती स",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "शेती स",
+    "शेती स माहिती",
+    "शेती स pdf"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "शेती स"
+}

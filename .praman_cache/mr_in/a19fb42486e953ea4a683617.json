@@ -1,0 +1,14 @@
+{
+  "query": "शेती द",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "शेती द",
+    "शेती द माहिती",
+    "शेती द pdf"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "शेती द"
+}

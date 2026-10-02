@@ -1,0 +1,17 @@
+{
+  "query": "शेती",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "शेती",
+    "शेती उदाहरण",
+    "शेती 2026",
+    "शेती काय",
+    "शेती pdf",
+    "शेती online"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "शेती"
+}

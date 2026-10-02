@@ -1,0 +1,16 @@
+{
+  "query": "வணக்கம் எது",
+  "language": "ta",
+  "region": "IN",
+  "suggestions": [
+    "வணக்கம் எது",
+    "வணக்கம் எது இலவச",
+    "வணக்கம் எது உதாரணம்",
+    "வணக்கம் எது எது",
+    "வணக்கம் எது 2026"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "வணக்கம் எது"
+}

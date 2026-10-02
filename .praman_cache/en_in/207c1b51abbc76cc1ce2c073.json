@@ -1,0 +1,15 @@
+{
+  "query": "where crop insurance",
+  "language": "en",
+  "region": "IN",
+  "suggestions": [
+    "where crop insurance",
+    "where crop insurance pdf",
+    "where crop insurance free",
+    "where crop insurance online"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "where crop insurance"
+}

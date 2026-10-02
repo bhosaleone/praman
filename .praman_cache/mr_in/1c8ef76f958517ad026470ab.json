@@ -1,0 +1,14 @@
+{
+  "query": "हवामान उदाहरण",
+  "language": "mr",
+  "region": "IN",
+  "suggestions": [
+    "हवामान उदाहरण",
+    "हवामान उदाहरण माहिती",
+    "हवामान उदाहरण pdf"
+  ],
+  "measured": true,
+  "source": "fixture",
+  "error": null,
+  "echoed_query": "हवामान उदाहरण"
+}
