@@ -1665,6 +1665,164 @@ body.light-sepia-theme {
 }
 
 /* ==========================================================================
+   Header Tutorial Guide Pill & Modal Elements
+   ========================================================================== */
+.guide-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--accent-saffron-light);
+  border: 1.5px solid var(--accent-saffron-border);
+  color: var(--accent-saffron);
+  border-radius: var(--radius-full);
+  padding: 0.4rem 0.95rem;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 1px 4px rgba(234, 88, 12, 0.08);
+  white-space: nowrap;
+}
+
+.guide-pill-btn:hover {
+  background: var(--accent-saffron);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-saffron);
+}
+
+.guide-icon {
+  font-size: 1rem;
+}
+
+.guide-modal-title-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.guide-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-saffron);
+}
+
+.guide-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.guide-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.guide-section-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.guide-lead {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.guide-step-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.guide-step-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  position: relative;
+}
+
+.guide-step-num {
+  width: 26px;
+  height: 26px;
+  background: var(--accent-saffron);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.35rem;
+}
+
+.guide-step-card h5 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.guide-step-card p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.guide-bands-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.guide-band-card {
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-subtle);
+}
+
+.guide-band-card.band-strong { background: #f0fdf4; border-color: #bbf7d0; }
+.guide-band-card.band-moderate { background: #fffbeb; border-color: #fde68a; }
+.guide-band-card.band-weak { background: #f5f5f4; border-color: #e7e5e4; }
+.guide-band-card.band-insufficient { background: #fef2f2; border-color: #fecaca; }
+
+.guide-band-badge {
+  font-size: 0.84rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.guide-band-card p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.guide-safety-box {
+  background: var(--bg-parchment);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--accent-emerald);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+}
+
+.guide-preset-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* ==========================================================================
    Mobile & Responsive Adaptations (Mobile First Polish)
    ========================================================================== */
 
@@ -1726,6 +1884,14 @@ body.light-sepia-theme {
     width: 100%;
   }
 
+  .guide-pill-btn {
+    grid-column: span 2;
+    justify-content: center;
+    width: 100%;
+    min-height: 42px;
+    font-size: 0.88rem;
+  }
+
   .control-pill {
     padding: 0.4rem 0.65rem;
     font-size: 0.78rem;
@@ -1737,6 +1903,11 @@ body.light-sepia-theme {
     font-size: 0.8rem;
     max-width: 110px;
     text-overflow: ellipsis;
+  }
+
+  .guide-step-grid,
+  .guide-bands-grid {
+    grid-template-columns: 1fr;
   }
 
   /* Main Container & Cards */

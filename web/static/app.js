@@ -145,6 +145,51 @@ function setupEventListeners() {
   setupScoreModalEvents();
   setupInspectorModalEvents();
   setupIntentModalEvents();
+  setupGuideModalEvents();
+}
+
+/* ==========================================================================
+   Tutorial & Workflow Guide Modal
+   ========================================================================== */
+function setupGuideModalEvents() {
+  const openBtn = document.getElementById('open-guide-btn');
+  const modal = document.getElementById('guide-modal');
+  const closeBtn = document.getElementById('guide-modal-close');
+  const gotItBtn = document.getElementById('guide-modal-got-it');
+
+  if (openBtn && modal) {
+    openBtn.addEventListener('click', () => {
+      modal.style.display = 'flex';
+    });
+  }
+
+  const closeModal = () => {
+    if (modal) modal.style.display = 'none';
+  };
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (gotItBtn) gotItBtn.addEventListener('click', closeModal);
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  // Quick preset triggers inside the guide modal
+  document.querySelectorAll('.guide-preset-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lang = btn.getAttribute('data-lang');
+      const seeds = btn.getAttribute('data-seeds');
+      const langSelect = document.getElementById('lang-select');
+      const seedsInput = document.getElementById('seeds-input');
+      if (langSelect) langSelect.value = lang;
+      if (seedsInput) seedsInput.value = seeds;
+      closeModal();
+      showToast(`Loaded ${btn.textContent.trim()}! Measuring demand...`);
+      runResearch();
+    });
+  });
 }
 
 /* ==========================================================================
