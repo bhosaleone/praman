@@ -196,7 +196,7 @@ function setupGuideModalEvents() {
       const seedsInput = document.getElementById('seeds-input');
       if (langSelect) langSelect.value = lang;
       if (seedsInput) seedsInput.value = seeds;
-      closeModal();
+      closeGuideModalDirect();
       showToast(`Loaded ${btn.textContent.trim()}! Measuring demand...`);
       runResearch();
     });

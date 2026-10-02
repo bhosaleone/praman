@@ -200,6 +200,7 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
     """Runs a pure Python stdlib HTTP server when FastAPI/Uvicorn are not installed."""
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
     import mimetypes
+    from urllib.parse import urlparse
 
     class PramanHTTPHandler(BaseHTTPRequestHandler):
         def _send_json(self, data: Any, status: int = 200) -> None:
@@ -219,11 +220,12 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
             self.end_headers()
 
         def do_HEAD(self) -> None:
-            if self.path in ("/", "/index.html"):
+            clean_path = urlparse(self.path).path
+            if clean_path in ("/", "/index.html"):
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
                 self.end_headers()
-            elif self.path in ("/health", "/api/health"):
+            elif clean_path in ("/health", "/api/health"):
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.end_headers()
@@ -232,7 +234,8 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                 self.end_headers()
 
         def do_GET(self) -> None:
-            if self.path == "/" or self.path == "/index.html":
+            clean_path = urlparse(self.path).path
+            if clean_path == "/" or clean_path == "/index.html":
                 index_path = TEMPLATES_DIR / "index.html"
                 with open(index_path, "rb") as f:
                     content = f.read()
@@ -241,14 +244,14 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                 self.send_header("Content-Length", str(len(content)))
                 self.end_headers()
                 self.wfile.write(content)
-            elif self.path in ("/api/health", "/health"):
+            elif clean_path in ("/api/health", "/health"):
                 self._send_json({"status": "ok", "version": "0.1.0"})
-            elif self.path == "/api/languages":
+            elif clean_path == "/api/languages":
                 self._send_json({
                     code: {"name": spec.name, "native_name": spec.native_name, "script": spec.script}
                     for code, spec in LANGUAGES.items()
                 })
-            elif self.path in ("/USER_MANUAL.md", "/manual", "/user-manual"):
+            elif clean_path in ("/USER_MANUAL.md", "/manual", "/user-manual"):
                 manual_path = PROJECT_ROOT / "USER_MANUAL.md"
                 if manual_path.exists():
                     with open(manual_path, "rb") as f:
@@ -260,7 +263,7 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                     self.wfile.write(content)
                 else:
                     self.send_error(404, "User Manual not found")
-            elif self.path in ("/LAUNCH_PITCH.md", "/pitch", "/launch-pitch"):
+            elif clean_path in ("/LAUNCH_PITCH.md", "/pitch", "/launch-pitch"):
                 pitch_path = PROJECT_ROOT / "LAUNCH_PITCH.md"
                 if pitch_path.exists():
                     with open(pitch_path, "rb") as f:
@@ -272,8 +275,8 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                     self.wfile.write(content)
                 else:
                     self.send_error(404, "Launch pitch not found")
-            elif self.path.startswith("/static/"):
-                rel_path = self.path[len("/static/"):]
+            elif clean_path.startswith("/static/"):
+                rel_path = clean_path[len("/static/"):]
                 target_file = STATIC_DIR / rel_path
                 if target_file.exists() and target_file.is_file():
                     mime, _ = mimetypes.guess_type(str(target_file))
@@ -290,7 +293,8 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                 self.send_error(404, "Not found")
 
         def do_POST(self) -> None:
-            if self.path == "/api/research":
+            clean_path = urlparse(self.path).path
+            if clean_path == "/api/research":
                 content_len = int(self.headers.get("Content-Length", 0))
                 body = self.rfile.read(content_len).decode("utf-8")
                 try:
