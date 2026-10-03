@@ -50,11 +50,17 @@ def get_groq_api_key() -> str:
     return os.environ.get("GROQ_API_KEY", "").strip()
 
 
-def _call_groq_chat(messages: list[dict[str, str]], model: str = PRIMARY_MODEL) -> dict[str, Any]:
+def _call_groq_chat(
+    messages: list[dict[str, str]],
+    model: str = PRIMARY_MODEL,
+    api_key: Optional[str] = None,
+) -> dict[str, Any]:
     """Issues a deterministic chat completion request to Groq."""
-    api_key = get_groq_api_key()
-    if not api_key:
-        raise ValueError("Groq API key is not configured.")
+    key = (api_key or get_groq_api_key()).strip()
+    if not key:
+        raise ValueError(
+            "Groq API key is not configured. Please enter your free key in the UI or set GROQ_API_KEY."
+        )
 
     payload = {
         "model": model,
@@ -68,7 +74,7 @@ def _call_groq_chat(messages: list[dict[str, str]], model: str = PRIMARY_MODEL) 
         GROQ_API_URL,
         data=json.dumps(payload).encode("utf-8"),
         headers={
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": f"Bearer {key}",
             "User-Agent": "Praman/1.0 (Indic Search Intelligence)",
             "Content-Type": "application/json",
         },
@@ -85,12 +91,12 @@ def _call_groq_chat(messages: list[dict[str, str]], model: str = PRIMARY_MODEL) 
         logger.warning("Groq API error on model %s: %s - %s", model, e, err_body)
         if model != FALLBACK_MODEL:
             logger.info("Retrying with fallback model %s...", FALLBACK_MODEL)
-            return _call_groq_chat(messages, model=FALLBACK_MODEL)
+            return _call_groq_chat(messages, model=FALLBACK_MODEL, api_key=api_key)
         raise RuntimeError(f"Groq API error ({e.code}): {err_body or e.reason}")
     except Exception as e:
         logger.exception("Unexpected error in Groq call")
         if model != FALLBACK_MODEL:
-            return _call_groq_chat(messages, model=FALLBACK_MODEL)
+            return _call_groq_chat(messages, model=FALLBACK_MODEL, api_key=api_key)
         raise
 
 
@@ -101,6 +107,7 @@ def generate_editorial_blueprint(
     intent: str = "informational",
     competition_band: Optional[str] = None,
     suggestions: Optional[list[str]] = None,
+    api_key: Optional[str] = None,
 ) -> dict[str, Any]:
     """Generates a publication-ready editorial blueprint strictly grounded in Praman's data.
 
@@ -145,7 +152,7 @@ def generate_editorial_blueprint(
         {"role": "user", "content": json.dumps(user_context, ensure_ascii=False)},
     ]
 
-    parsed = _call_groq_chat(messages)
+    parsed = _call_groq_chat(messages, api_key=api_key)
 
     # Build Schema.org/FAQPage JSON-LD
     faq_items = parsed.get("faq", [])
@@ -233,7 +240,11 @@ def generate_editorial_blueprint(
     }
 
 
-def expand_indic_seeds(seed: str, source_language: str = "mr") -> list[dict[str, str]]:
+def expand_indic_seeds(
+    seed: str,
+    source_language: str = "mr",
+    api_key: Optional[str] = None,
+) -> list[dict[str, str]]:
     """Deterministically expands an Indic seed into culturally authentic search equivalents in other languages."""
     system_prompt = (
         "You are an expert Indic search lexicographer. "
@@ -255,7 +266,7 @@ def expand_indic_seeds(seed: str, source_language: str = "mr") -> list[dict[str,
     ]
 
     try:
-        parsed = _call_groq_chat(messages)
+        parsed = _call_groq_chat(messages, api_key=api_key)
         return parsed.get("variants", [])
     except Exception as e:
         logger.exception("Error expanding seeds via Groq")

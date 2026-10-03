@@ -78,6 +78,10 @@
             <option value="or">ଓଡ଼ିଆ (Odia)</option>
           </select>
         </div>
+        <button type="button" id="groq-key-btn" class="guide-pill-btn" style="background:#fff7ed; border-color:#fdba74; color:#c2410c; font-weight:700;" title="Configure Free Groq API Key for Article Blueprints">
+          <span class="guide-icon">🔑</span>
+          <span class="guide-btn-text">AI Key</span>
+        </button>
         <button type="button" id="open-guide-btn" class="guide-pill-btn" onclick="openGuideModalDirect()" aria-label="Open User Tutorial and Workflow" title="How Praman Works & Workflow Guide">
           <span class="guide-icon">📖</span>
           <span class="guide-btn-text">Tutorial &amp; Workflow</span>
@@ -579,6 +583,40 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-outline btn-sm" id="expand-seeds-cancel">Cancel</button>
         <button type="button" class="btn btn-primary btn-sm" id="expand-seeds-apply-btn">Add Selected Seeds to Queue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Groq API Key Settings Modal -->
+  <div id="groq-key-modal" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="groq-key-modal-title">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.2rem;">🔑</span>
+          <h3 id="groq-key-modal-title" class="modal-title">Configure Free Groq API Key</h3>
+        </div>
+        <button type="button" class="modal-close-btn" id="groq-key-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          Praman uses Groq's high-speed LPU engine (500+ tokens/sec) for deterministic, zero-hallucination article blueprints and cross-lingual seed expansion.
+        </p>
+        <div class="serp-form-group" style="margin: 12px 0;">
+          <label class="serp-label" for="groq-key-input">
+            <strong>Groq API Key:</strong>
+            <input type="password" id="groq-key-input" class="number-input" placeholder="gsk_..." style="width: 100%; font-family: monospace; font-size: 0.88rem; padding: 8px 10px;">
+          </label>
+        </div>
+        <div style="font-size: 0.8rem; color: #645648; line-height: 1.4;">
+          💡 Your key is saved locally in your browser and used for requests. Free tier includes 14,400 requests/day at <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color: #ea580c; text-decoration: underline; font-weight: 600;">console.groq.com/keys</a>.
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-outline btn-sm" id="groq-key-clear-btn" style="color: #be123c;">Clear Key</button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-outline btn-sm" id="groq-key-modal-cancel">Cancel</button>
+          <button type="button" class="btn btn-primary btn-sm" id="groq-key-modal-save">Save Key</button>
+        </div>
       </div>
     </div>
   </div>

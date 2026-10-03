@@ -150,6 +150,7 @@ function setupEventListeners() {
   setupGuideModalEvents();
   setupBlueprintModalEvents();
   setupExpandSeedsEvents();
+  setupGroqKeyEvents();
 }
 
 /* ==========================================================================
@@ -1609,13 +1610,15 @@ async function openBlueprintModal(kw) {
   `;
 
   try {
+    const userKey = localStorage.getItem('praman_groq_api_key') || '';
     const payload = {
       seed: kw.seed,
       language: (currentData && currentData.language) || 'mr',
       demand: kw.demand,
       intent: kw.intent,
       competition_band: kw.competition?.band || null,
-      suggestions: (kw.signals && (kw.signals.discovered || kw.signals.research_candidates)) || []
+      suggestions: (kw.signals && (kw.signals.discovered || kw.signals.research_candidates)) || [],
+      groq_api_key: userKey
     };
 
     const resp = await fetch('/api/blueprint', {
@@ -1634,6 +1637,47 @@ async function openBlueprintModal(kw) {
     renderBlueprintModal(kw, data);
   } catch (err) {
     console.error('Error generating blueprint:', err);
+    const isKeyError = err.message && (err.message.includes('Groq API key') || err.message.includes('key is not configured'));
+
+    if (isKeyError) {
+      body.innerHTML = `
+        <div style="padding: 2.5rem 1.5rem; text-align: center; max-width: 520px; margin: 0 auto;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🔑</div>
+          <h3 style="font-size: 1.25rem; color: #271f18; margin-bottom: 0.5rem;">Connect Free Groq API Key</h3>
+          <p style="font-size: 0.88rem; color: #645648; line-height: 1.5; margin-bottom: 1.25rem;">
+            To generate lightning-fast, zero-hallucination article blueprints, enter your free Groq API key below. Free forever (14,400 requests/day, no credit card needed).
+          </p>
+          <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
+            <input type="password" id="modal-groq-key-input" class="number-input" placeholder="Paste gsk_... here" style="flex: 1; padding: 10px 12px; font-family: monospace; font-size: 0.88rem;">
+            <button type="button" id="modal-groq-key-save-btn" class="btn btn-primary" style="white-space: nowrap;">⚡ Save &amp; Generate</button>
+          </div>
+          <div style="font-size: 0.8rem; color: #948372;">
+            Need a key? <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color: #ea580c; font-weight: 700; text-decoration: underline;">Get free key at console.groq.com &rarr;</a>
+          </div>
+        </div>
+      `;
+
+      const saveBtn = document.getElementById('modal-groq-key-save-btn');
+      const input = document.getElementById('modal-groq-key-input');
+      if (input) {
+        input.value = localStorage.getItem('praman_groq_api_key') || '';
+        input.focus();
+      }
+      if (saveBtn && input) {
+        saveBtn.addEventListener('click', () => {
+          const val = input.value.trim();
+          if (!val) {
+            showToast('Please enter your Groq API key (starts with gsk_)');
+            return;
+          }
+          localStorage.setItem('praman_groq_api_key', val);
+          showToast('🔑 Key saved! Synthesizing blueprint...');
+          openBlueprintModal(kw);
+        });
+      }
+      return;
+    }
+
     body.innerHTML = `
       <div style="padding: 2rem; text-align: center; color: #be123c;">
         <h4>Failed to Generate Blueprint</h4>
@@ -1752,19 +1796,22 @@ function setupExpandSeedsEvents() {
       expandBtn.innerHTML = '⚡ Expanding...';
 
       try {
+        const userKey = localStorage.getItem('praman_groq_api_key') || '';
         const resp = await fetch('/api/expand-seeds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             seed: querySeed,
-            language: (currentData && currentData.language) || 'mr'
+            language: (currentData && currentData.language) || 'mr',
+            groq_api_key: userKey
           })
         });
 
         expandBtn.innerHTML = '🌐 Expand Indic (AI)';
 
         if (!resp.ok) {
-          throw new Error('Failed to expand seeds');
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to expand seeds');
         }
 
         const data = await resp.json();
@@ -1793,7 +1840,17 @@ function setupExpandSeedsEvents() {
       } catch (err) {
         expandBtn.innerHTML = '🌐 Expand Indic (AI)';
         console.error('Error expanding seeds:', err);
-        showToast('Error discovering Indic variants');
+        const isKey = err.message && (err.message.includes('Groq API key') || err.message.includes('key is not configured'));
+        if (isKey) {
+          const keyModal = document.getElementById('groq-key-modal');
+          if (keyModal) {
+            document.querySelectorAll('.modal-backdrop').forEach(m => m.style.display = 'none');
+            keyModal.style.display = 'flex';
+          }
+          showToast('🔑 Please configure your free Groq API key first');
+        } else {
+          showToast(`Error discovering Indic variants: ${err.message}`);
+        }
       }
     });
   }
@@ -1816,4 +1873,55 @@ function setupExpandSeedsEvents() {
     });
   }
 }
+
+/* ==========================================================================
+   Groq API Key Settings Modal
+   ========================================================================== */
+function setupGroqKeyEvents() {
+  const btn = document.getElementById('groq-key-btn');
+  const modal = document.getElementById('groq-key-modal');
+  const closeBtn = document.getElementById('groq-key-modal-close');
+  const cancelBtn = document.getElementById('groq-key-modal-cancel');
+  const saveBtn = document.getElementById('groq-key-modal-save');
+  const clearBtn = document.getElementById('groq-key-clear-btn');
+  const input = document.getElementById('groq-key-input');
+
+  const openModal = () => {
+    if (!modal) return;
+    document.querySelectorAll('.modal-backdrop').forEach(m => m.style.display = 'none');
+    if (input) {
+      input.value = localStorage.getItem('praman_groq_api_key') || '';
+    }
+    modal.style.display = 'flex';
+    if (input) input.focus();
+  };
+
+  const closeModal = () => { if (modal) modal.style.display = 'none'; };
+
+  if (btn) btn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      localStorage.removeItem('praman_groq_api_key');
+      if (input) input.value = '';
+      showToast('🗑️ Cleared stored Groq API key');
+    });
+  }
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      const val = input ? input.value.trim() : '';
+      if (!val) {
+        showToast('Please enter a valid key or click Clear');
+        return;
+      }
+      localStorage.setItem('praman_groq_api_key', val);
+      closeModal();
+      showToast('🔑 Groq API key saved successfully!');
+    });
+  }
+}
+
 

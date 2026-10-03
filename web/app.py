@@ -202,6 +202,7 @@ try:
                 intent=payload.get("intent", "informational"),
                 competition_band=payload.get("competition_band"),
                 suggestions=payload.get("suggestions", []),
+                api_key=payload.get("groq_api_key"),
             )
         except Exception as e:
             logger.exception("Error generating blueprint")
@@ -213,6 +214,7 @@ try:
             variants = expand_indic_seeds(
                 seed=payload.get("seed", ""),
                 source_language=payload.get("language", "mr"),
+                api_key=payload.get("groq_api_key"),
             )
             return {"variants": variants}
         except Exception as e:
@@ -338,6 +340,7 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                     self._send_json({"error": str(e)}, status=500)
             elif clean_path == "/api/blueprint":
                 try:
+                    client_key = payload.get("groq_api_key") or self.headers.get("X-Groq-Api-Key")
                     res = generate_editorial_blueprint(
                         seed=payload.get("seed", ""),
                         language=payload.get("language", "mr"),
@@ -345,6 +348,7 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                         intent=payload.get("intent", "informational"),
                         competition_band=payload.get("competition_band"),
                         suggestions=payload.get("suggestions", []),
+                        api_key=client_key,
                     )
                     self._send_json(res)
                 except Exception as e:
@@ -352,9 +356,11 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                     self._send_json({"error": str(e)}, status=500)
             elif clean_path == "/api/expand-seeds":
                 try:
+                    client_key = payload.get("groq_api_key") or self.headers.get("X-Groq-Api-Key")
                     variants = expand_indic_seeds(
                         seed=payload.get("seed", ""),
                         source_language=payload.get("language", "mr"),
+                        api_key=client_key,
                     )
                     self._send_json({"variants": variants})
                 except Exception as e:
