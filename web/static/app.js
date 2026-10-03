@@ -697,6 +697,14 @@ async function runResearch() {
     }
 
     currentData = await res.json();
+    if (typeof gtag === 'function') {
+      gtag('event', 'search', {
+        search_term: seeds.join(','),
+        language: lang,
+        mode: mode,
+        results_count: currentData.keywords ? currentData.keywords.length : 0
+      });
+    }
     updateUIWithResults(currentData);
   } catch (err) {
     console.error('Research error:', err);
@@ -1032,6 +1040,9 @@ function exportCSV() {
 
   const filename = `praman_demand_${new Date().toISOString().slice(0, 10)}.csv`;
   triggerDownload(filename, csvContent, 'text/csv;charset=utf-8');
+  if (typeof gtag === 'function') {
+    gtag('event', 'export_data', { format: 'csv' });
+  }
   showToast('Downloaded CSV report');
 }
 
@@ -1043,6 +1054,9 @@ function exportJSON() {
   const dataStr = JSON.stringify(currentData, null, 2);
   const filename = `praman_demand_${new Date().toISOString().slice(0, 10)}.json`;
   triggerDownload(filename, dataStr, 'application/json;charset=utf-8');
+  if (typeof gtag === 'function') {
+    gtag('event', 'export_data', { format: 'json' });
+  }
   showToast('Downloaded JSON export');
 }
 
