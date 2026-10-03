@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Praman SERP Companion</title>
+  <style>
+    :root {
+      --bg: #faf6ee;
+      --card: #ffffff;
+      --saffron: #ea580c;
+      --saffron-hover: #c2410c;
+      --ink: #271f18;
+      --muted: #645648;
+      --border: #dfd2be;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      width: 360px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 13px;
+    }
+    .header {
+      background: #ffffff;
+      border-bottom: 1.5px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #ffffff;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+    }
+    .brand-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .version-tag {
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(234, 88, 12, 0.1);
+      color: var(--saffron);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .content {
+      padding: 14px 16px;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(60, 40, 20, 0.04);
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-low { background: #dcfce7; color: #15803d; }
+    .badge-medium { background: #fef3c7; color: #b45309; }
+    .badge-high { background: #ffedd5; color: #c2410c; }
+    .badge-very_high { background: #ffe4e6; color: #be123c; }
+    .badge-unmeasured { background: #f4ece0; color: #948372; }
+
+    .signal-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid #f4ece0;
+      font-size: 12px;
+    }
+    .signal-row:last-child {
+      border-bottom: none;
+    }
+    .btn {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-sizing: border-box;
+      margin-bottom: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-saffron {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);
+    }
+    .btn-saffron:hover {
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
+    }
+    .btn-outline {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--ink);
+    }
+    .btn-outline:hover {
+      background: #f4ece0;
+    }
+    .footer {
+      text-align: center;
+      padding: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">प्र</div>
+      <div class="brand-title">Praman Companion</div>
+    </div>
+    <span class="version-tag">v1.0.0</span>
+  </div>
+
+  <div class="content">
+    <div id="active-serp-view">
+      <div class="card">
+        <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Google SERP Query</div>
+        <div id="query-text" style="font-size:14px; font-weight:800; color:var(--ink); margin-bottom:8px;">Searching...</div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; color:var(--muted);">Competition:</span>
+          <span id="band-badge" class="badge badge-unmeasured">Analyzing...</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:11px; font-weight:700; margin-bottom:6px; color:var(--ink);">Praman SERP Signals</div>
+        <div class="signal-row">
+          <span>Weak Domains in Top 5:</span>
+          <strong id="weak-signal">-</strong>
+        </div>
+        <div class="signal-row">
+          <span>Thin / Exact Match Missing:</span>
+          <strong id="thin-signal">-</strong>
+        </div>
+        <div class="signal-row">
+          <span>Top Results Stale (&gt; 2 yrs):</span>
+          <strong id="stale-signal">-</strong>
+        </div>
+      </div>
+
+      <button id="copy-serp-btn" class="btn btn-outline">📋 Copy SERP Data</button>
+      <button id="send-praman-btn" class="btn btn-saffron">⚡ Send to Praman Planner</button>
+    </div>
+
+    <div id="inactive-view" style="display:none; text-align:center; padding:10px 0;">
+      <p style="color:var(--muted); line-height:1.5; margin-bottom:14px;">
+        To analyze competition automatically without manual labor, search any query on <strong>Google.com</strong>!
+      </p>
+      <a href="https://www.google.com" target="_blank" class="btn btn-outline">🔍 Open Google Search</a>
+      <a href="https://www.praman.blog" target="_blank" class="btn btn-saffron">⚡ Open Praman App</a>
+    </div>
+
+    <div class="card" style="margin-top:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">Recent Saved SERPs</span>
+        <button id="clear-history-btn" style="background:none; border:none; color:var(--saffron); font-size:10px; cursor:pointer; font-weight:700;">Clear</button>
+      </div>
+      <div id="recent-list" style="font-size:11px; color:var(--muted); max-height:100px; overflow-y:auto;">
+        No recent queries saved yet.
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    100% Google TOS Compliant &bull; <a href="https://www.praman.blog" target="_blank" style="color:var(--saffron); font-weight:700; text-decoration:none;">praman.blog</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

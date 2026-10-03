@@ -141,6 +141,8 @@ function setupEventListeners() {
 
   // Setup Modals
   setupSerpModalEvents();
+  setupSerpImportEvents();
+  setupSerpBridgeAndUrlListener();
   setupReportModalEvents();
   setupScoreModalEvents();
   setupInspectorModalEvents();
@@ -515,6 +517,15 @@ function setupSerpModalEvents() {
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
   if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
+  const googleBtn = document.getElementById('serp-modal-google-btn');
+  if (googleBtn) {
+    googleBtn.addEventListener('click', () => {
+      if (currentEditingSeed) {
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(currentEditingSeed)}`, '_blank');
+      }
+    });
+  }
+
   ['thin', 'weak', 'stale'].forEach(field => {
     const container = document.getElementById(`toggle-${field}`);
     if (!container) return;
@@ -615,6 +626,273 @@ function updateSerpPreviewBadge() {
 
   badge.className = `badge badge-evidence-${band === 'low' ? 'strong' : (band === 'medium' ? 'moderate' : 'weak')}`;
   badge.textContent = `${band} (${recordedCount}/3 fields recorded)`;
+}
+
+/* ==========================================================================
+   SERP Companion Ingestion & Import Modal
+   ========================================================================== */
+function importSerpData(payload, shouldRunResearch = true) {
+  if (!payload) return 0;
+
+  let items = [];
+  if (Array.isArray(payload)) {
+    items = payload;
+  } else if (payload.keyword || payload.seed) {
+    items = [payload];
+  } else if (typeof payload === 'object') {
+    // Dictionary of keyword -> observation
+    for (const [k, v] of Object.entries(payload)) {
+      if (v && typeof v === 'object') {
+        items.push({ keyword: k, ...v });
+      }
+    }
+  }
+
+  if (items.length === 0) return 0;
+
+  const seedsTextarea = document.getElementById('seeds-input');
+  const existingSeedsText = seedsTextarea ? seedsTextarea.value : '';
+  const existingSeedsList = existingSeedsText
+    .split(/[\n,]/)
+    .map(s => s.trim().toLowerCase())
+    .filter(s => s.length > 0);
+
+  const newSeedsToAdd = [];
+  let importedCount = 0;
+
+  items.forEach(item => {
+    const kw = (item.keyword || item.seed || '').trim();
+    if (!kw) return;
+
+    // Normalize booleans
+    const parseBool = (val) => {
+      if (val === true || val === 'yes' || val === 'true') return true;
+      if (val === false || val === 'no' || val === 'false') return false;
+      return null;
+    };
+
+    const thin = parseBool(item.thin !== undefined ? item.thin : item.thin_results);
+    const weak = parseBool(item.weak !== undefined ? item.weak : item.weak_domains);
+    const stale = parseBool(item.stale !== undefined ? item.stale : item.top_results_stale);
+
+    // Notes
+    let notes = item.notes || '';
+    if (!notes && item.topDomains && Array.isArray(item.topDomains)) {
+      notes = `Top domains: ${item.topDomains.slice(0, 3).join(', ')}`;
+    }
+    if (!notes) {
+      notes = 'Imported via Praman SERP Companion';
+    }
+
+    serpObservations[kw] = {
+      thin: thin,
+      weak: weak,
+      stale: stale,
+      notes: notes
+    };
+
+    importedCount++;
+
+    if (!existingSeedsList.includes(kw.toLowerCase())) {
+      newSeedsToAdd.push(kw);
+      existingSeedsList.push(kw.toLowerCase());
+    }
+  });
+
+  if (newSeedsToAdd.length > 0 && seedsTextarea) {
+    const prefix = existingSeedsText.trim() ? existingSeedsText.trim() + '\n' : '';
+    seedsTextarea.value = prefix + newSeedsToAdd.join('\n');
+  }
+
+  const sampleKw = (items[0].keyword || items[0].seed || '');
+  const countStr = importedCount === 1 ? `"${sampleKw}"` : `${importedCount} keywords`;
+  showToast(`✅ Imported SERP data for ${countStr}`);
+
+  if (shouldRunResearch) {
+    runResearch();
+  }
+
+  return importedCount;
+}
+
+function setupSerpImportEvents() {
+  const modal = document.getElementById('serp-import-modal');
+  const openBtn = document.getElementById('import-serp-btn');
+  const tableOpenBtn = document.getElementById('table-import-serp-btn');
+  const closeBtn = document.getElementById('serp-import-close');
+  const cancelBtn = document.getElementById('serp-import-cancel');
+  const pasteBtn = document.getElementById('serp-import-paste-btn');
+  const sampleBtn = document.getElementById('serp-import-sample-btn');
+  const clearBtn = document.getElementById('serp-import-clear-btn');
+  const applyBtn = document.getElementById('serp-import-apply-btn');
+  const textarea = document.getElementById('serp-import-json');
+  const previewDiv = document.getElementById('serp-import-preview');
+  const previewContent = document.getElementById('serp-import-preview-content');
+  const countBadge = document.getElementById('serp-import-count-badge');
+  const errorDiv = document.getElementById('serp-import-error');
+
+  const openModal = () => {
+    if (!modal) return;
+    document.querySelectorAll('.modal-backdrop').forEach(m => m.style.display = 'none');
+    modal.style.display = 'flex';
+    updatePreview();
+    if (textarea) textarea.focus();
+  };
+
+  const closeModal = () => {
+    if (modal) modal.style.display = 'none';
+  };
+
+  if (openBtn) openBtn.addEventListener('click', openModal);
+  if (tableOpenBtn) tableOpenBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (textarea) textarea.value = '';
+      updatePreview();
+    });
+  }
+
+  if (sampleBtn) {
+    sampleBtn.addEventListener('click', () => {
+      const sample = {
+        keyword: "शेती योजना 2026",
+        thin: true,
+        weak: true,
+        stale: false,
+        band: "low",
+        notes: "UGC forums & Quora dominating top 5 results",
+        topDomains: ["quora.com", "facebook.com", "blogspot.com"]
+      };
+      if (textarea) {
+        textarea.value = JSON.stringify(sample, null, 2);
+        updatePreview();
+      }
+    });
+  }
+
+  if (pasteBtn) {
+    pasteBtn.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text && textarea) {
+          textarea.value = text;
+          updatePreview();
+          showToast('📋 Pasted clipboard contents');
+        }
+      } catch (err) {
+        console.warn('Clipboard read failed:', err);
+        showToast('Please paste manually using Ctrl+V / Cmd+V');
+        if (textarea) textarea.focus();
+      }
+    });
+  }
+
+  function updatePreview() {
+    if (!textarea || !previewDiv || !previewContent) return;
+    const val = textarea.value.trim();
+    if (!val) {
+      previewDiv.style.display = 'none';
+      if (errorDiv) errorDiv.style.display = 'none';
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(val);
+      let items = [];
+      if (Array.isArray(parsed)) items = parsed;
+      else if (parsed.keyword || parsed.seed) items = [parsed];
+      else if (typeof parsed === 'object') {
+        for (const [k, v] of Object.entries(parsed)) {
+          if (v && typeof v === 'object') items.push({ keyword: k, ...v });
+        }
+      }
+
+      if (items.length === 0) {
+        throw new Error('No valid keyword observations found in JSON');
+      }
+
+      if (errorDiv) errorDiv.style.display = 'none';
+      previewDiv.style.display = 'block';
+      if (countBadge) countBadge.textContent = `${items.length} observation${items.length > 1 ? 's' : ''}`;
+
+      previewContent.innerHTML = items.slice(0, 5).map(it => {
+        const kw = it.keyword || it.seed || 'unnamed';
+        const band = (it.band || 'unmeasured').toUpperCase();
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 4px 0; border-bottom: 1px solid #ebdccb;">
+            <strong>${escapeHTML(kw)}</strong>
+            <span class="badge badge-comp-${(it.band || 'unmeasured').toLowerCase()}">${band}</span>
+          </div>
+        `;
+      }).join('');
+
+      if (items.length > 5) {
+        previewContent.innerHTML += `<div style="font-size:0.75rem; color:#948372; margin-top:4px;">...and ${items.length - 5} more</div>`;
+      }
+    } catch (e) {
+      previewDiv.style.display = 'none';
+      if (errorDiv) {
+        errorDiv.textContent = `Invalid JSON: ${e.message}`;
+        errorDiv.style.display = 'block';
+      }
+    }
+  }
+
+  if (textarea) {
+    textarea.addEventListener('input', updatePreview);
+  }
+
+  if (applyBtn) {
+    applyBtn.addEventListener('click', () => {
+      if (!textarea) return;
+      const val = textarea.value.trim();
+      if (!val) {
+        showToast('Please paste or type SERP observation JSON first');
+        return;
+      }
+      try {
+        const parsed = JSON.parse(val);
+        const count = importSerpData(parsed, true);
+        if (count > 0) {
+          closeModal();
+        } else {
+          showToast('Could not find valid keywords in JSON');
+        }
+      } catch (e) {
+        showToast(`Error parsing JSON: ${e.message}`);
+      }
+    });
+  }
+}
+
+function setupSerpBridgeAndUrlListener() {
+  // 1. Check URL parameters on page load: ?import_serp=...
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const importSerp = urlParams.get('import_serp');
+    if (importSerp) {
+      const decoded = decodeURIComponent(importSerp);
+      const parsed = JSON.parse(decoded);
+      importSerpData(parsed, true);
+      // Clean up URL parameter cleanly without page refresh
+      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+      window.history.replaceState({ path: cleanUrl }, document.title, cleanUrl);
+    }
+  } catch (err) {
+    console.error('Error auto-importing SERP data from URL query param:', err);
+  }
+
+  // 2. Listen for window messages (from praman-bridge.js injected by Chrome extension)
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'PRAMAN_SERP_IMPORT' && event.data.observation) {
+      importSerpData(event.data.observation, true);
+    } else if (event.data && event.data.type === 'PRAMAN_EXTENSION_READY') {
+      console.log('Praman SERP Companion Chrome extension is active (v' + (event.data.version || '1.0') + ')');
+    }
+  });
 }
 
 /* ==========================================================================
@@ -851,7 +1129,9 @@ function renderTable() {
     };
 
     const compBand = kw.competition?.band || 'unmeasured';
-    const compLabel = compBand !== 'unmeasured' ? `<span class="badge ${evClass}">${compBand}</span>` : '<span style="color:#948372;font-size:0.85rem;">unmeasured</span>';
+    const compLabel = compBand !== 'unmeasured' 
+      ? `<span class="badge badge-comp-${compBand}" title="${escapeHTML(kw.competition?.notes || '')}">${compBand}</span>` 
+      : '<span style="color:#948372;font-size:0.85rem;">unmeasured</span>';
 
     // Intent label with dedicated diagnostic and scrollable evidence inspector
     let intentHtml = `<span class="badge badge-intent" onclick="openIntentModal('${escapeHTML(kw.seed)}')" title="Click to view intent diagnostic and suggestion evidence">${kw.intent}</span>`;

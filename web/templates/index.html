@@ -122,10 +122,15 @@
             <input type="number" id="max-queries-input" class="number-input" placeholder="No limit" min="10" step="50" aria-label="Query budget ceiling">
           </div>
 
-          <button type="button" id="run-research-btn" class="btn btn-primary">
-            <span class="btn-spinner" id="btn-spinner" aria-hidden="true"></span>
-            <span class="btn-text">⚡ Measure Demand</span>
-          </button>
+          <div class="actions-group" style="display:flex; gap:8px; align-items:center;">
+            <button type="button" id="import-serp-btn" class="btn btn-outline" title="Import SERP observations from Chrome Extension or Clipboard">
+              <span>📥 Import SERP Data</span>
+            </button>
+            <button type="button" id="run-research-btn" class="btn btn-primary">
+              <span class="btn-spinner" id="btn-spinner" aria-hidden="true"></span>
+              <span class="btn-text">⚡ Measure Demand</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -192,6 +197,7 @@
         <div class="table-toolbar">
           <input type="text" id="table-search" class="search-input" placeholder="🔍 Search or filter seeds..." aria-label="Filter keywords in table">
           <div class="table-toolbar-right">
+            <button type="button" class="btn btn-outline btn-sm" id="table-import-serp-btn" style="padding: 4px 10px; font-size: 0.8rem;" title="Import SERP observations from Companion or Clipboard">📥 Import SERP</button>
             <span class="table-swipe-hint">👈 Swipe table for all metrics 👉</span>
             <span class="table-count-label" id="table-row-count">Showing 0 rows</span>
           </div>
@@ -392,8 +398,11 @@
         <button type="button" class="modal-close-btn" id="serp-modal-close" aria-label="Close modal">&times;</button>
       </div>
       <div class="modal-body">
-        <p class="modal-seed-label">Keyword: <strong id="serp-modal-keyword"></strong></p>
-        <p class="modal-desc">Inspect Google search results in your browser for this query and record your observations below (NO_API.md §62-78):</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <p class="modal-seed-label" style="margin:0;">Keyword: <strong id="serp-modal-keyword"></strong></p>
+          <button type="button" class="btn btn-outline btn-sm" id="serp-modal-google-btn" style="font-size:0.78rem; padding:3px 8px;" title="Open Google Search in new tab to let Praman Companion inspect it">🔍 Search on Google</button>
+        </div>
+        <p class="modal-desc">Inspect Google search results in your browser (or with Praman Companion extension) and record your observations below (NO_API.md §62-78):</p>
 
         <div class="serp-form-group">
           <label class="serp-label">
@@ -436,6 +445,52 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-outline btn-sm" id="serp-modal-cancel">Cancel</button>
         <button type="button" class="btn btn-saffron btn-sm" id="serp-modal-save">Apply Observations</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive SERP Import Modal (Chrome Extension / Clipboard) -->
+  <div id="serp-import-modal" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="serp-import-title">
+    <div class="modal-card" style="max-width: 560px;">
+      <div class="modal-header">
+        <h3 id="serp-import-title" class="modal-title">📥 Import SERP Data from Companion</h3>
+        <button type="button" class="modal-close-btn" id="serp-import-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          Paste SERP observation JSON exported or copied from the <strong>Praman SERP Companion</strong> Chrome Extension, or click <strong>Paste from Clipboard</strong>. Zero manual entry or scraping needed.
+        </p>
+
+        <div style="display: flex; gap: 8px; margin: 10px 0;">
+          <button type="button" class="btn btn-outline btn-sm" id="serp-import-paste-btn" style="font-weight: 600;">📋 Paste from Clipboard</button>
+          <button type="button" class="btn btn-outline btn-sm" id="serp-import-sample-btn">💡 Load Sample</button>
+          <button type="button" class="btn btn-outline btn-sm" id="serp-import-clear-btn" style="margin-left:auto;">Clear</button>
+        </div>
+
+        <div class="serp-form-group" style="padding: 0.6rem;">
+          <textarea id="serp-import-json" class="seeds-textarea" rows="6" placeholder='Paste observation JSON here... e.g.:
+{
+  "keyword": "शेती योजना",
+  "thin": true,
+  "weak": true,
+  "stale": false,
+  "notes": "Weak UGC forums in top 5"
+}' style="font-family: monospace; font-size: 0.84rem; width: 100%; border: none; background: transparent; resize: vertical;"></textarea>
+        </div>
+
+        <div id="serp-import-preview" style="margin-top: 12px; display: none; background: #faf6ee; padding: 12px; border-radius: 8px; border: 1px solid #dfd2be;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: #645648; text-transform: uppercase; letter-spacing: 0.05em;">Parsed Observations</span>
+            <span id="serp-import-count-badge" class="badge badge-evidence-strong">0 items</span>
+          </div>
+          <div id="serp-import-preview-content" style="font-size: 0.85rem; max-height: 140px; overflow-y: auto;"></div>
+        </div>
+
+        <div id="serp-import-error" style="display: none; margin-top: 10px; color: #be123c; font-size: 0.85rem; font-weight: 600;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-sm" id="serp-import-cancel">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="serp-import-apply-btn">Apply &amp; Recalculate</button>
       </div>
     </div>
   </div>

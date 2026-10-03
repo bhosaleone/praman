@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "Praman SERP Companion — Indic Search Intelligence",
+  "version": "1.0.0",
+  "description": "Zero-labor SERP competition analyzer for Google Search. Analyzes weak domains, stale results, and thin content for Praman.blog.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "clipboardWrite",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "https://www.google.com/search*",
+    "https://www.google.co.in/search*",
+    "https://www.praman.blog/*",
+    "http://localhost:8000/*",
+    "http://127.0.0.1:8000/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Praman SERP Analyzer",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.google.com/search*",
+        "https://www.google.co.in/search*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.praman.blog/*",
+        "http://localhost:8000/*",
+        "http://127.0.0.1:8000/*"
+      ],
+      "js": ["praman-bridge.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
