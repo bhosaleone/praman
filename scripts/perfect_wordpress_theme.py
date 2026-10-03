@@ -487,6 +487,23 @@ HOMEPAGE_CONTENT = """<!-- wp:html -->
 
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); gap:1.75rem;">
       
+      <!-- Featured Card: Blogging in India Master Guide -->
+      <article style="background:#ffffff; border:2px solid #ea580c; border-radius:16px; padding:1.75rem; box-shadow:0 4px 14px rgba(234, 88, 12, 0.08); display:flex; flex-direction:column; justify-content:space-between; grid-column:1 / -1;">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+            <span style="font-size:0.75rem; font-weight:800; color:#ffffff; background:#ea580c; padding:0.25rem 0.75rem; border-radius:6px; text-transform:uppercase; letter-spacing:0.05em;">New Live Research • English, Hindi &amp; Marathi</span>
+            <span style="font-size:0.85rem; color:#645648; font-weight:700;">10 min read • 100% Verified Telemetry</span>
+          </div>
+          <h3 style="font-size:1.45rem; font-weight:800; margin:0 0 0.85rem; line-height:1.35;">
+            <a href="/how-to-start-a-blog-in-india-2026-guide/" style="color:#271f18; text-decoration:none;">How to Start a High-Earning Blog in India (2026): A Praman Search Intelligence Teardown</a>
+          </h3>
+          <p style="font-size:0.98rem; color:#645648; line-height:1.65; margin-bottom:1.25rem;">
+            We put Praman's live autocomplete engine to the test on real blogging seeds. Discover the massive hidden surge in regional news blogging, real Indian RPM economics ($0.40 vs $5.50), and the 5-step technical blueprint to launching a profitable media property.
+          </p>
+        </div>
+        <a href="/how-to-start-a-blog-in-india-2026-guide/" style="font-weight:700; font-size:1rem; color:#ea580c; display:inline-flex; align-items:center; gap:0.4rem;">Read Complete Teardown &rarr;</a>
+      </article>
+
       <!-- Card 1: Marathi Krishi -->
       <article style="background:#ffffff; border:1px solid #dfd2be; border-radius:16px; padding:1.75rem; box-shadow:0 2px 10px rgba(60, 40, 20, 0.05); display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.2s ease;">
         <div>
