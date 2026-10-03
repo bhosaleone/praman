@@ -18,10 +18,12 @@
    - [Step 8: Diagnosing Intent & Inspecting Evidence](#step-8-diagnosing-intent--inspecting-evidence)
    - [Step 9: Recording Human SERP Competition](#step-9-recording-human-serp-competition)
    - [Step 10: Editorial Content Calendar & Internal Linking](#step-10-editorial-content-calendar--internal-linking)
-   - [Step 11: Exporting Reports (Markdown, CSV, JSON)](#step-11-exporting-reports-markdown-csv-json)
-4. [The 4 Demand Axes & Mathematical Invariants](#4-the-4-demand-axes--mathematical-invariants)
-5. [Evidence Banding Cheatsheet](#5-evidence-banding-cheatsheet)
-6. [Troubleshooting & FAQs](#6-troubleshooting--faqs)
+   - [Step 11: Generating Evidence-Grounded Editorial Blueprints](#step-11-generating-evidence-grounded-editorial-blueprints)
+   - [Step 12: Exporting Reports (Markdown, CSV, JSON)](#step-12-exporting-reports-markdown-csv-json)
+4. [The Complete Publishing Loop & Architecture](#4-the-complete-publishing-loop--architecture)
+5. [The 4 Demand Axes & Mathematical Invariants](#5-the-4-demand-axes--mathematical-invariants)
+6. [Evidence Banding Cheatsheet](#6-evidence-banding-cheatsheet)
+7. [Troubleshooting & FAQs](#7-troubleshooting--faqs)
 
 ---
 
@@ -278,7 +280,23 @@ Click the **`📅 Editorial Content Plan & Links`** tab to view your operational
 
 ---
 
-### Step 11: Exporting Reports (Markdown, CSV, JSON)
+### Step 11: Generating Evidence-Grounded Editorial Blueprints
+
+Praman deliberately rejects the generic "AI Article Generator" model. Praman does not promise: *"AI writes your article."*  
+Instead, Praman promises: **"Praman turns measured research into an evidence-grounded editorial blueprint."**
+
+1. In the Demand Table, click **`⚡ Blueprint`** next to any measured keyword.
+2. The pluggable **Intelligence Layer** (Groq LPU with zero temperature) turns Praman's measured search queries into a comprehensive editorial structure:
+   - **SEO Title & Meta Description**: Optimized character counts aligned with user search intent.
+   - **Target Word Count**: Calibrated to topical breadth and competition band.
+   - **Editorial Heading Hierarchy (H2 / H3)**: Every heading is explicitly mapped to specific queries discovered by Praman (`Answering Praman queries: [query 1, query 2]`), alongside essential factual points.
+   - **Schema.org / FAQPage JSON-LD**: Ready-to-embed JSON-LD FAQ schema to rank on Google PAA (People Also Ask) cards and SERP rich snippets.
+3. Click **`📋 Copy Markdown`** to paste the complete editorial blueprint into Notion, Google Docs, or Obsidian.
+4. Click **`📋 Copy FAQ Schema`** to paste the JSON-LD snippet directly into your Rank Math or WordPress SEO plugin.
+
+---
+
+### Step 12: Exporting Reports (Markdown, CSV, JSON)
 
 Praman provides comprehensive export actions in the action bar:
 
@@ -289,7 +307,19 @@ Praman provides comprehensive export actions in the action bar:
 
 ---
 
-## 4. The 4 Demand Axes & Mathematical Invariants
+## 4. The Complete Publishing Loop & Architecture
+
+Praman establishes a complete, closed-loop publishing flywheel that connects initial query exploration with live search engine feedback:
+
+$$\text{Research} \longrightarrow \text{Evidence} \longrightarrow \text{SERP} \longrightarrow \text{Blueprint} \longrightarrow \text{Writing (Human/AI)} \longrightarrow \text{Publish} \longrightarrow \text{Search Console Feedback} \longrightarrow \text{New Research}$$
+
+### The Core Invariant: Evidence Independent of Intelligence
+1. **The Evidence Layer**: Pure deterministic math, 3-state codomain ($V = \mathbb{R} \cup \{\bot\}$), and verified Google autocomplete signals. It never hallucinates, never estimates arbitrary volumes, and never changes denominators.
+2. **The Intelligence Layer**: Pluggable synthesis (Groq LPU today, OpenAI or Claude tomorrow). It turns verified evidence into an actionable editorial blueprint (Title, Meta Description, query-mapped H2/H3 outline, and FAQ JSON-LD Schema). It does not "generate" content independently of measured truth.
+
+---
+
+## 5. The 4 Demand Axes & Mathematical Invariants
 
 | Axis | Formula | Nominal Weight | Physical Meaning |
 |---|---|:---:|---|
@@ -300,7 +330,7 @@ Praman provides comprehensive export actions in the action bar:
 
 ---
 
-## 5. Evidence Banding Cheatsheet
+## 6. Evidence Banding Cheatsheet
 
 | Evidence Band | Demand Score Range | Editorial Recommendation |
 |---|:---:|---|
@@ -311,7 +341,7 @@ Praman provides comprehensive export actions in the action bar:
 
 ---
 
-## 6. Troubleshooting & FAQs
+## 7. Troubleshooting & FAQs
 
 ### Q: Why do all my seeds show "Strong Evidence"?
 **A**: Broad root queries (e.g. `शेती`, `हवामान`, `पीक विमा`) have massive statewide demand that triggers suggestions on almost every consonant probe. To test long-tail gaps, test targeted queries like `सोयाबीन तणनाशक फवारणी वेळ` or `ठिबक सिंचन अनुदान योजना 2026`.

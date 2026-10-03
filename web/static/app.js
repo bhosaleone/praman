@@ -1161,7 +1161,7 @@ function renderTable() {
       </td>
       <td>
         <button type="button" class="tree-trigger-btn" onclick="switchToTreeTab('${escapeHTML(kw.seed)}')">🌳 Tree (${kw.signals?.research_candidates?.length || kw.signals?.discovered?.length || 0})</button>
-        <button type="button" class="blueprint-trigger-btn" onclick='openBlueprintModal(${JSON.stringify(kw)})' title="Synthesize publication-ready article outline & FAQ schema via Groq AI">⚡ Blueprint</button>
+        <button type="button" class="blueprint-trigger-btn" onclick='openBlueprintModal(${JSON.stringify(kw)})' title="Turn measured research into an evidence-grounded editorial blueprint">⚡ Blueprint</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -1602,9 +1602,9 @@ async function openBlueprintModal(kw) {
   body.innerHTML = `
     <div style="text-align: center; padding: 3rem 1rem;">
       <div class="btn-spinner" style="display: inline-block; width: 32px; height: 32px; border-width: 3px; border-color: #ea580c; border-top-color: transparent; margin-bottom: 1rem;"></div>
-      <h4 style="font-size: 1.15rem; color: #271f18; margin-bottom: 0.5rem;">Synthesizing Deterministic Blueprint...</h4>
-      <p style="font-size: 0.88rem; color: #645648; max-width: 480px; margin: 0 auto;">
-        Groq LPU is transforming Praman's measured search queries for <strong>"${escapeHTML(kw.seed)}"</strong> into an editorial outline and FAQ schema.
+      <h4 style="font-size: 1.15rem; color: #271f18; margin-bottom: 0.5rem;">Synthesizing Evidence-Grounded Blueprint...</h4>
+      <p style="font-size: 0.88rem; color: #645648; max-width: 500px; margin: 0 auto;">
+        Turning Praman's measured search queries for <strong>"${escapeHTML(kw.seed)}"</strong> into an evidence-grounded editorial blueprint.
       </p>
     </div>
   `;
@@ -1643,9 +1643,9 @@ async function openBlueprintModal(kw) {
       body.innerHTML = `
         <div style="padding: 2.5rem 1.5rem; text-align: center; max-width: 520px; margin: 0 auto;">
           <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🔑</div>
-          <h3 style="font-size: 1.25rem; color: #271f18; margin-bottom: 0.5rem;">Connect Free Groq API Key</h3>
+          <h3 style="font-size: 1.25rem; color: #271f18; margin-bottom: 0.5rem;">Connect Blueprint Intelligence Key</h3>
           <p style="font-size: 0.88rem; color: #645648; line-height: 1.5; margin-bottom: 1.25rem;">
-            To generate lightning-fast, zero-hallucination article blueprints, enter your free Groq API key below. Free forever (14,400 requests/day, no credit card needed).
+            Praman turns measured research into an evidence-grounded editorial blueprint. Enter your free Groq API key below for instant, zero-hallucination synthesis. Free forever (14,400 requests/day, no credit card needed).
           </p>
           <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
             <input type="password" id="modal-groq-key-input" class="number-input" placeholder="Paste gsk_... here" style="flex: 1; padding: 10px 12px; font-family: monospace; font-size: 0.88rem;">
@@ -1733,6 +1733,11 @@ function renderBlueprintModal(kw, bp) {
   body.innerHTML = `
     <!-- Metadata Overview Bar -->
     <div class="blueprint-meta-box">
+      <div style="font-size: 0.82rem; color: #854d0e; background: #fefce8; border: 1px solid #fef08a; padding: 7px 12px; border-radius: 6px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <span>💡</span>
+        <span><strong>Core Promise:</strong> Praman turns measured research into an evidence-grounded editorial blueprint—grounding every H2/H3 and FAQ directly in verified search demand.</span>
+      </div>
+
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
         <div>
           <span style="font-size: 0.72rem; font-weight: 700; color: #645648; text-transform: uppercase;">Seed Keyword</span>
@@ -1748,7 +1753,7 @@ function renderBlueprintModal(kw, bp) {
       <div style="display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 0.88rem; background: #ffffff; padding: 10px 12px; border-radius: 6px; border: 1px solid #ebdccb;">
         <div><strong>SEO Title Tag:</strong> <code>${escapeHTML(bp.title)}</code></div>
         <div><strong>Meta Description:</strong> <span style="color: #645648;">${escapeHTML(bp.meta_description)}</span> <small style="color: #948372;">(${bp.meta_description?.length || 0} chars)</small></div>
-        <div><strong>Target Word Count:</strong> ~${bp.target_word_count || 1200} words | <strong>Engine:</strong> Groq LPU (0.0 temp)</div>
+        <div><strong>Target Word Count:</strong> ~${bp.target_word_count || 1200} words | <strong>Intelligence Layer:</strong> Groq LPU (Deterministic 0.0 temp)</div>
       </div>
     </div>
 

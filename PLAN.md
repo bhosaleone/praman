@@ -52,3 +52,16 @@ The entire application is organized in a self-contained layout:
 - `cli.py`: Standalone CLI supporting offline recorded playback, fixture mode, and live requests.
 - `web/`: Lightweight Web dashboard (FastAPI/Uvicorn) with visual charts, link graph exploration, and SERP note taking.
 - `Dockerfile` & `docker-compose.yml`: Containerized setup ready for single-container deployment (Render, Railway, VPS, or local Docker).
+
+---
+
+## 4. The Publishing Loop & The Pluggable Intelligence Layer
+
+### 4.1 The Complete Publishing Flywheel
+Praman establishes a closed-loop publishing lifecycle connecting search query physics to live Search Console feedback:
+$$\text{Research} \longrightarrow \text{Evidence} \longrightarrow \text{SERP} \longrightarrow \text{Blueprint} \longrightarrow \text{Writing (Human/AI)} \longrightarrow \text{Publish} \longrightarrow \text{Search Console Feedback} \longrightarrow \text{New Research}$$
+
+### 4.2 Decoupled Evidence vs. Intelligence Layers
+- **Core Principle**: *"Praman turns measured research into an evidence-grounded editorial blueprint."* It rejects the misleading promise of "AI Article Generators."
+- **The Evidence Layer**: Pure deterministic standard library mathematics, 4-axis pinned scoring, and tri-state codomains. It is independent of all external AI APIs and never hallucinates.
+- **The Intelligence Layer**: Pluggable editorial synthesis (via Groq LPU `openai/gpt-oss-120b` today; OpenAI `gpt-4o` or Claude tomorrow). It accepts the structured evidence contract and generates query-mapped heading hierarchies and Schema.org/FAQPage JSON-LD at temperature 0.0 with zero parameter drift.

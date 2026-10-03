@@ -124,9 +124,85 @@ graph TD
 - Generates a prioritized publishing calendar with recommended article shapes (Explainer, Guide, Comparison, News).
 - Produces a cycle-free internal linking graph with specific anchor texts.
 
+### 5. Evidence-Grounded Editorial Article Blueprints
+Praman does not promise: *"AI writes your article."*  
+Praman promises: **"Praman turns measured research into an evidence-grounded editorial blueprint."**
+
+When an editor or creator clicks **`⚡ Blueprint`** on any measured keyword:
+- Praman packages the mathematical evidence: seed, pinned demand score, intent profile, competition band, and verified autocomplete query clusters.
+- The pluggable Intelligence Layer structures this into a publication-ready editorial architecture:
+  1. **SEO Title Tag & Meta Description**: Character-counted and tuned to regional search intent.
+  2. **Editorial Heading Hierarchy (H2 / H3)**: Every single section is mapped to specific verified user queries (`Answering Praman queries: [पीक विमा 2026, पीक विमा यादी]`).
+  3. **Editorial Discussion Points**: Key factual beats and questions the writer must address.
+  4. **Schema.org / FAQPage JSON-LD**: Ready-to-paste structured data to capture Google SERP rich snippets and PAA cards.
+
 ---
 
-## Part IV: Commercial Model & Unit Economics
+## Part IV: The Complete Publishing Flywheel
+
+Praman enables a complete, closed-loop publishing ecosystem that connects initial keyword curiosity to real-world search rankings:
+
+```mermaid
+graph LR
+    A[1. Research] --> B[2. Evidence]
+    B --> C[3. SERP]
+    C --> D[4. Blueprint]
+    D --> E[5. Writing<br/>Human / AI]
+    E --> F[6. Publish]
+    F --> G[7. Search Console<br/>Feedback]
+    G --> A
+```
+
+$$\text{Research} \longrightarrow \text{Evidence} \longrightarrow \text{SERP} \longrightarrow \text{Blueprint} \longrightarrow \text{Writing (Human/AI)} \longrightarrow \text{Publish} \longrightarrow \text{Search Console Feedback} \longrightarrow \text{New Research}$$
+
+1. **Research**: Multi-axis deterministic autocomplete expansion across 11 languages (Head, Alphabet, Modifiers, SOV Questions).
+2. **Evidence**: Pinned convex combination demand scoring with mathematically invariant denominators ($0.0 \le \text{demand} \le 1.0$) and a 3-state codomain ($V = \mathbb{R} \cup \{\bot\}$).
+3. **SERP**: Grounded competition analysis via human observation or the 1-click Praman SERP Companion Chrome extension.
+4. **Blueprint**: Synthesis of an evidence-grounded editorial blueprint where every heading and FAQ corresponds directly to verified search demand.
+5. **Writing (Human / AI)**: The writer (human journalist, freelance copywriter, or AI-assisted drafting tool) creates authoritative content following the exact blueprint.
+6. **Publish**: Content is published to CMS (WordPress / headless CMS / regional portal) with embedded Rank Math FAQ schema and cycle-free internal links.
+7. **Search Console Feedback**: Real search queries, impressions, and click-through rates from Google Search Console validate article traction and highlight emerging long-tail queries.
+8. **New Research**: Search Console queries feed directly back into Step 1 as new Praman seeds, spinning the content flywheel continuously.
+
+---
+
+## Part V: The Architectural Moat — Independence of Evidence from Intelligence
+
+Most "AI SEO" tools conflate research with generation. They ask an LLM: *"Give me 10 keywords and write an article."* This results in hallucinated search volumes, fabricated difficulty scores, and generic AI slop.
+
+Praman enforces an inviolable architectural separation:
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   THE INTELLIGENCE LAYER               │
+│      (Pluggable Synthesis: Groq LPU, OpenAI, Claude,   │
+│            Local LLMs — 0.0 Temp, Zero Drift)          │
+└───────────────────────────▲────────────────────────────┘
+                            │ Structured Evidence Contract
+                            │ (Seed, Score, Queries, Band)
+┌───────────────────────────┴────────────────────────────┐
+│                    THE EVIDENCE LAYER                  │
+│   (Strict Deterministic Math: Python Stdlib Core,      │
+│     Real Google Autocomplete API, Pinned Blends,       │
+│        Tri-State Codomain, SERP Ground Truth)          │
+└────────────────────────────────────────────────────────┘
+```
+
+1. **The Evidence Layer is Absolute Ground Truth**:
+   - Built on pure Python standard library code.
+   - Pinned mathematical formulas (Breadth 50%, Coverage 25%, Density 15%, Depth 10%).
+   - Zero hallucination, zero faked metrics, zero moving denominators.
+   - Operates with 100% independence from any AI API.
+
+2. **The Intelligence Layer is Pluggable Synthesis**:
+   - The intelligence layer simply acts as a structured formatter and editorial architect.
+   - Today, it leverages **Groq LPU** (`openai/gpt-oss-120b`) for sub-second, deterministic synthesis at zero temperature.
+   - If OpenAI (`gpt-4o`), Anthropic (`claude-3-5-sonnet`), or local open-source models are integrated later, it isn't because *"we need OpenAI."*
+   - It is because Praman has built an architecture where **the evidence layer is permanently decoupled from the intelligence layer**. The ground truth never changes; only the synthesis plug-in is swapped.
+
+---
+
+## Part VI: Commercial Model & Unit Economics
 
 ### 1. Unit Economics: Why Praman is 95%+ Gross Margin
 - Devanagari seed = **49 queries**. Latin/English seed = **42 queries**.
@@ -147,7 +223,7 @@ graph TD
 
 ---
 
-## Part V: Go-To-Market (GTM) & Launch Strategy
+## Part VII: Go-To-Market (GTM) & Launch Strategy
 
 ### Phase 1: The "20 Regional Bloggers" Alpha/Beta (Weeks 1–4)
 - **Goal**: Direct qualitative feedback and content validation.
@@ -166,7 +242,7 @@ graph TD
 
 ---
 
-## Part VI: 10-Slide Pitch Presentation Deck
+## Part VIII: 10-Slide Pitch Presentation Deck
 
 ### Slide 1: Title & Hook
 **Praman (प्रमाण)** — The Evidence-First Keyword Demand Engine for Regional India  
@@ -189,10 +265,10 @@ graph TD
 - Pinned voice weights ($0.50$ Breadth, $0.25$ Coverage, $0.15$ Density, $0.10$ Depth).
 - Measured mass $c(s)$ tracking without weight renormalization.
 
-### Slide 5: Product Calibration & The Loop
-- Evidence Bands (Strong, Moderate, Weak, Insufficient) replacing arbitrary priority flags.
-- Clean separation of Raw Observations vs. Actionable Research Candidates.
-- The `[+ Measure]` loop: turning one seed into an entire cluster of validated content opportunities.
+### Slide 5: The Complete Publishing Flywheel
+- The Closed-Loop: Research ➔ Evidence ➔ SERP ➔ Blueprint ➔ Writing ➔ Publish ➔ Search Console Feedback ➔ New Research.
+- "Praman turns measured research into an evidence-grounded editorial blueprint."
+- Replaces generic AI article writing with evidence-grounded heading hierarchies and Rank Math FAQ schemas.
 
 ### Slide 6: Linguistic Intelligence
 - Indian SOV question grammar awareness.
@@ -204,10 +280,10 @@ graph TD
 - Live run results: `शेती` (0.875 demand, 81 candidates), `पीक विमा` (0.844 demand, 80 candidates), `crop insurance` (0.839 demand, 109 candidates).
 - 100% reproducible score breakdowns.
 
-### Slide 8: 95%+ Gross Margin Architecture
-- Zero-dependency Python standard library core.
-- No costly SERP proxies, scraping meshes, or AI token overhead.
-- Unit cost: < ₹0.80 per 1,000 keyword evaluations.
+### Slide 8: The Decoupled Architecture (Evidence vs. Intelligence)
+- **Evidence Layer**: Zero-dependency Python standard library core for deterministic math, 3-state codomain, and autocomplete truth.
+- **Intelligence Layer**: Pluggable synthesis (Groq LPU today, OpenAI/Claude tomorrow) strictly decoupled from demand measurement.
+- Unit cost: < ₹0.80 per 1,000 evaluations; 95%+ gross margins.
 
 ### Slide 9: India-First Monetization
 - Community Free Beta (250 queries/mo) for viral adoption.

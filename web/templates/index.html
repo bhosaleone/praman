@@ -78,9 +78,9 @@
             <option value="or">ଓଡ଼ିଆ (Odia)</option>
           </select>
         </div>
-        <button type="button" id="groq-key-btn" class="guide-pill-btn" style="background:#fff7ed; border-color:#fdba74; color:#c2410c; font-weight:700;" title="Configure Free Groq API Key for Article Blueprints">
+        <button type="button" id="groq-key-btn" class="guide-pill-btn" style="background:#fff7ed; border-color:#fdba74; color:#c2410c; font-weight:700;" title="Configure API Key for Evidence-Grounded Editorial Blueprints">
           <span class="guide-icon">🔑</span>
-          <span class="guide-btn-text">AI Key</span>
+          <span class="guide-btn-text">Blueprint Key</span>
         </button>
         <button type="button" id="open-guide-btn" class="guide-pill-btn" onclick="openGuideModalDirect()" aria-label="Open User Tutorial and Workflow" title="How Praman Works & Workflow Guide">
           <span class="guide-icon">📖</span>
@@ -539,13 +539,13 @@
     </div>
   </div>
 
-  <!-- AI Editorial Blueprint Modal (Powered by Groq) -->
+  <!-- AI Editorial Blueprint Modal (Powered by Groq / Pluggable Intelligence Layer) -->
   <div id="blueprint-modal" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="blueprint-modal-title">
     <div class="modal-card modal-large" style="max-width: 860px; max-height: 90vh;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; font-size: 0.76rem; font-weight: 800; padding: 2px 7px; border-radius: 5px; letter-spacing: 0.05em;">GROQ AI</span>
-          <h3 id="blueprint-modal-title" class="modal-title">Editorial Article Blueprint</h3>
+          <span style="background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; font-size: 0.76rem; font-weight: 800; padding: 2px 8px; border-radius: 5px; letter-spacing: 0.05em;">EDITORIAL BLUEPRINT</span>
+          <h3 id="blueprint-modal-title" class="modal-title">Evidence-Grounded Editorial Blueprint</h3>
         </div>
         <button type="button" class="modal-close-btn" id="blueprint-modal-close" aria-label="Close modal">&times;</button>
       </div>
@@ -553,7 +553,7 @@
         <!-- Filled dynamically -->
       </div>
       <div class="modal-footer" id="blueprint-modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <span style="font-size: 0.78rem; color: #948372;">⚡ Deterministic outline strictly grounded in Praman search data</span>
+        <span style="font-size: 0.8rem; color: #7c6853;">💡 <strong>Promise:</strong> Praman turns measured research into an evidence-grounded editorial blueprint.</span>
         <div style="display: flex; gap: 8px;">
           <button type="button" class="btn btn-outline btn-sm" id="blueprint-copy-schema-btn">📋 Copy FAQ Schema</button>
           <button type="button" class="btn btn-primary btn-sm" id="blueprint-copy-md-btn">📋 Copy Markdown</button>
@@ -587,19 +587,19 @@
     </div>
   </div>
 
-  <!-- Groq API Key Settings Modal -->
+  <!-- Blueprint Key Settings Modal -->
   <div id="groq-key-modal" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="groq-key-modal-title">
     <div class="modal-card" style="max-width: 500px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span style="font-size: 1.2rem;">🔑</span>
-          <h3 id="groq-key-modal-title" class="modal-title">Configure Free Groq API Key</h3>
+          <h3 id="groq-key-modal-title" class="modal-title">Configure Blueprint Intelligence Key</h3>
         </div>
         <button type="button" class="modal-close-btn" id="groq-key-modal-close" aria-label="Close modal">&times;</button>
       </div>
       <div class="modal-body">
         <p class="modal-desc">
-          Praman uses Groq's high-speed LPU engine (500+ tokens/sec) for deterministic, zero-hallucination article blueprints and cross-lingual seed expansion.
+          Praman turns measured research into an evidence-grounded editorial blueprint. Praman's <strong>Evidence Layer</strong> is mathematically independent from its <strong>Intelligence Layer</strong>. Enter your Groq API key to synthesize fast, zero-hallucination outlines and Rank Math FAQ schemas:
         </p>
         <div class="serp-form-group" style="margin: 12px 0;">
           <label class="serp-label" for="groq-key-input">
@@ -608,7 +608,7 @@
           </label>
         </div>
         <div style="font-size: 0.8rem; color: #645648; line-height: 1.4;">
-          💡 Your key is saved locally in your browser and used for requests. Free tier includes 14,400 requests/day at <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color: #ea580c; text-decoration: underline; font-weight: 600;">console.groq.com/keys</a>.
+          💡 Your key is saved locally in your browser. Groq free tier includes 14,400 requests/day at <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color: #ea580c; text-decoration: underline; font-weight: 600;">console.groq.com/keys</a>.
         </div>
       </div>
       <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
@@ -706,6 +706,21 @@
           <h4 class="guide-section-title">🛡️ The Praman Integrity &amp; Safety Guarantee</h4>
           <p><strong>Zero SERP Scraping:</strong> We never scrape search result pages or bypass bot protections. Competition checks are 100% human-observed.</p>
           <p><strong>Zero Fabricated Numbers:</strong> Traditional SEO tools multiply clickstream approximations to give you "10,000 monthly volume" that often turns out to be zero in regional languages. Praman shows verified autocomplete demand mathematically.</p>
+        </section>
+
+        <!-- The Complete Publishing Loop -->
+        <section class="guide-section">
+          <h4 class="guide-section-title">🔄 The Complete Publishing Loop</h4>
+          <p class="guide-lead" style="font-weight: 600; color: #9a3412; margin-bottom: 8px;">
+            "Praman does not promise 'AI writes your article.' Praman turns measured research into an evidence-grounded editorial blueprint."
+          </p>
+          <div style="background: #faf6ee; border: 1px solid #ebdccb; border-radius: 8px; padding: 12px 14px; margin: 10px 0; font-family: monospace; font-size: 0.82rem; color: #433324; line-height: 1.6; word-break: break-word;">
+            <strong>Publishing Flywheel:</strong> Research ➔ Evidence ➔ SERP ➔ Blueprint ➔ Writing (Human / AI) ➔ Publish ➔ Search Console Feedback ➔ New Research
+          </div>
+          <div style="font-size: 0.86rem; color: #503e2c; line-height: 1.55;">
+            <p><strong>Independent Evidence Layer:</strong> Demand calculations, convex combinations, and competition bands are pure deterministic math based on verified Google autocomplete data. They never hallucinate.</p>
+            <p style="margin-top: 6px;"><strong>Pluggable Intelligence Layer:</strong> Groq LPU (or future models like OpenAI) synthesizes that evidence into an actionable editorial blueprint (SEO Title, Meta Description, query-mapped H2/H3 outline, and FAQ JSON-LD schema) without altering the underlying data truth.</p>
+          </div>
         </section>
 
         <!-- Quick Launch Presets Inside Modal -->
