@@ -488,3 +488,183 @@ def get_language_spec(code: str) -> LanguageSpec:
     if code in LANGUAGES:
         return LANGUAGES[code]
     return LANGUAGES["mr"]
+
+
+# =====================================================================
+# Indian Commercial & Affiliate Search Modifiers
+# Tailored to the Indian buying mentality:
+# 1. Paisa Vasool (Price, Durability, Running cost)
+# 2. Trust Deficit (Real vs Fake, Customer Care, Complaints)
+# 3. Sarkari Anudan (Subsidies, Schemes, MahaDBT)
+# 4. Direct Head-to-Head Comparisons (vs, तुलना)
+# 5. Price Brackets (च्या आत, under)
+# =====================================================================
+
+COMMERCIAL_AFFILIATE_MODIFIERS: dict[str, list[tuple[str, str]]] = {
+    "mr": [
+        ("किंमत", "commercial_price"),
+        ("दर 2026", "commercial_price"),
+        ("रिव्ह्यू", "commercial_review"),
+        ("खरे की खोटे", "commercial_trust"),
+        ("वॉरंटी", "commercial_warranty"),
+        ("अनुदान", "commercial_subsidy"),
+        ("vs", "commercial_vs"),
+        ("कसा वापरायचा", "commercial_demo"),
+        ("सर्वोत्तम", "commercial_best"),
+        ("च्या आत", "commercial_budget"),
+    ],
+    "hi": [
+        ("कीमत", "commercial_price"),
+        ("प्राइस 2026", "commercial_price"),
+        ("रिव्यू", "commercial_review"),
+        ("असली या नकली", "commercial_trust"),
+        ("वारंटी", "commercial_warranty"),
+        ("सब्सिडी", "commercial_subsidy"),
+        ("vs", "commercial_vs"),
+        ("कैसे इस्तेमाल करें", "commercial_demo"),
+        ("सबसे अच्छा", "commercial_best"),
+        ("के अंदर", "commercial_budget"),
+    ],
+    "en": [
+        ("price 2026", "commercial_price"),
+        ("review", "commercial_review"),
+        ("original vs fake", "commercial_trust"),
+        ("warranty", "commercial_warranty"),
+        ("subsidy", "commercial_subsidy"),
+        ("versus", "commercial_vs"),
+        ("how to use", "commercial_demo"),
+        ("best", "commercial_best"),
+        ("under", "commercial_budget"),
+        ("complaints", "commercial_trust"),
+    ],
+    "ta": [
+        ("விலை", "commercial_price"),
+        ("மதிப்புரை", "commercial_review"),
+        ("உண்மை அல்லது போலி", "commercial_trust"),
+        ("உத்தரவாதம்", "commercial_warranty"),
+        ("மானிய", "commercial_subsidy"),
+        ("ஒப்பீடு", "commercial_vs"),
+        ("சிறந்த", "commercial_best"),
+    ],
+    "te": [
+        ("ధర", "commercial_price"),
+        ("రివ్యూ", "commercial_review"),
+        ("అసలైన లేదా నకిలీ", "commercial_trust"),
+        ("వారంటీ", "commercial_warranty"),
+        ("సబ్సిడీ", "commercial_subsidy"),
+        ("పోలిక", "commercial_vs"),
+        ("ఉత్తమ", "commercial_best"),
+    ],
+    "bn": [
+        ("দাম", "commercial_price"),
+        ("রিভিউ", "commercial_review"),
+        ("আসল না নকল", "commercial_trust"),
+        ("ওয়ারেন্টি", "commercial_warranty"),
+        ("ভর্তুকি", "commercial_subsidy"),
+        ("তুলনা", "commercial_vs"),
+        ("সেরা", "commercial_best"),
+    ],
+    "gu": [
+        ("કિંમત", "commercial_price"),
+        ("રિવ્યુ", "commercial_review"),
+        ("અસલી કે નકલી", "commercial_trust"),
+        ("વોરંટી", "commercial_warranty"),
+        ("સબસિડી", "commercial_subsidy"),
+        ("સરખામણી", "commercial_vs"),
+        ("શ્રેષ્ઠ", "commercial_best"),
+    ],
+    "kn": [
+        ("ಬೆಲೆ", "commercial_price"),
+        ("ವಿಮರ್ಶೆ", "commercial_review"),
+        ("ಅಸಲಿ ಅಥವಾ ನಕಲಿ", "commercial_trust"),
+        ("ವಾರಂಟಿ", "commercial_warranty"),
+        ("ಸಬ್ಸಿಡಿ", "commercial_subsidy"),
+        ("ಹೋಲಿಕೆ", "commercial_vs"),
+        ("ಉತ್ತಮ", "commercial_best"),
+    ],
+    "ml": [
+        ("വില", "commercial_price"),
+        ("റിവ്യൂ", "commercial_review"),
+        ("യഥാർത്ഥമോ വ്യാജമോ", "commercial_trust"),
+        ("വാറന്റി", "commercial_warranty"),
+        ("സബ്‌സിഡി", "commercial_subsidy"),
+        ("താരതമ്യം", "commercial_vs"),
+        ("മികച്ച", "commercial_best"),
+    ],
+    "pa": [
+        ("ਮੁੱਲ", "commercial_price"),
+        ("ਰੀਵਿਊ", "commercial_review"),
+        ("ਅਸਲੀ ਜਾਂ ਨਕਲੀ", "commercial_trust"),
+        ("ਵਾਰੰਟੀ", "commercial_warranty"),
+        ("ਸਬਸਿਡੀ", "commercial_subsidy"),
+        ("ਤੁਲਨਾ", "commercial_vs"),
+        ("ਸਭ ਤੋਂ ਵਧੀਆ", "commercial_best"),
+    ],
+    "or": [
+        ("ମୂଲ୍ୟ", "commercial_price"),
+        ("ରିଭ୍ୟୁ", "commercial_review"),
+        ("ଅସଲି କି ନକଲି", "commercial_trust"),
+        ("ୱାରେଣ୍ଟି", "commercial_warranty"),
+        ("ସବସିଡି", "commercial_subsidy"),
+        ("ତୁଳନା", "commercial_vs"),
+        ("ସର୍ବୋତ୍ତମ", "commercial_best"),
+    ],
+}
+
+
+def get_commercial_modifiers(language_code: str) -> list[tuple[str, str]]:
+    """Returns commercial affiliate modifier probes for the given language."""
+    if language_code in COMMERCIAL_AFFILIATE_MODIFIERS:
+        return COMMERCIAL_AFFILIATE_MODIFIERS[language_code]
+    return COMMERCIAL_AFFILIATE_MODIFIERS.get("mr", [])
+
+
+BUYER_INTENT_CATEGORIES: dict[str, list[str]] = {
+    "price": [
+        "किंमत", "दर", "भाव", "कीमत", "दाम", "price", "pricing", "cost", "rate",
+        "discount", "offer", "offers", "sale", "deal", "deals", "सस्ता", "कमी भाव",
+        "விலை", "ధర", "দাম", "કિંમત", "ಬೆಲೆ", "വില", "ਮੁੱਲ", "ମୂଲ୍ୟ"
+    ],
+    "trust": [
+        "खरे की खोटे", "असली या नकली", "original vs fake", "real vs fake", "duplicate",
+        "डुप्लिकेट", "तक्रार", "शिकायत", "complaint", "complaints", "scam", "fraud",
+        "कस्टमर केअर", "customer care", "toll free", "हेल्पलाईन", "helpline", "फसवणूक",
+        "fake", "genuine", "original", "असली", "खरे"
+    ],
+    "warranty": [
+        "वॉरंटी", "वारंटी", "गारंटी", "गॅरंटी", "warranty", "guarantee",
+        "सर्व्हिस सेंटर", "service center", "spare part", "पार्ट्स", "स्पेअर पार्ट", "repair"
+    ],
+    "subsidy": [
+        "अनुदान", "सब्सिडी", "योजना", "subsidy", "subsidies", "mahadbt", "pm kisan",
+        "surya ghar", "dbt", "yojana", "सूट", "कर्ज", "loan", "योजना 2026", "योजना 2025"
+    ],
+    "comparison": [
+        "vs", "versus", "तुलना", "विरुद्ध", "बनाम", "फरक", "अंतर", "तुलना करा", "compare", "comparison"
+    ],
+    "review": [
+        "रिव्ह्यू", "रिव्यू", "review", "reviews", "rating", "ratings", "सर्वोत्तम",
+        "सर्वोत्कृष्ट", "सबसे अच्छा", "best", "top 10", "top 5", "reasons to buy", "चांगला", "चांगली"
+    ],
+    "budget": [
+        "च्या आत", "च्या खाली", "के अंदर", "under", "बजेट", "budget", "कमी बजेट", "किफायती"
+    ],
+    "purchase": [
+        "खरेदी", "खरीदें", "buy", "purchase", "order", "online shopping", "cod", "cash on delivery", "दुकान"
+    ],
+}
+
+
+def detect_buyer_intent(text: str) -> Optional[str]:
+    """Detects if a query contains commercial/buyer intent tokens.
+
+    Returns the intent category ('price', 'subsidy', 'trust', 'warranty', 'comparison', 'review', 'budget', 'purchase')
+    or None if no commercial intent is detected.
+    """
+    clean_lower = text.lower()
+    for category, tokens in BUYER_INTENT_CATEGORIES.items():
+        for t in tokens:
+            if t.lower() in clean_lower:
+                return category
+    return None
+

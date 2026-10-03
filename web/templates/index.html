@@ -104,6 +104,9 @@
           <span class="preset-label">Quick Presets:</span>
           <button type="button" class="preset-btn" data-lang="mr" data-seeds="शेती, हवामान, पीक विमा, marathi sheti">🌾 Marathi Agri</button>
           <button type="button" class="preset-btn" data-lang="hi" data-seeds="शेयर बाजार, म्यूचुअल फंड, बचत खाता, लोन">📈 Hindi Finance</button>
+          <button type="button" class="preset-btn" data-lang="mr" data-seeds="बॅटरी स्प्रे पंप, ठिबक सिंचन, सोलर कुंपण झटका मशीन, चारा कटर मशीन" style="background:#f0fdf4; border-color:#86efac; color:#15803d; font-weight:700;">🚜 Bharat Agri Tools</button>
+          <button type="button" class="preset-btn" data-lang="mr" data-seeds="सोलर पॅनल, पीएम सूर्य घर योजना, सोलर इन्व्हर्टर, सोलर वॉटर हीटर" style="background:#fefce8; border-color:#fde047; color:#a16207; font-weight:700;">⚡ Solar &amp; Energy</button>
+          <button type="button" class="preset-btn" data-lang="mr" data-seeds="10000 च्या आत मोबाईल, 5G फोन बजेट, बेस्ट स्मार्ट वॉच, ब्लूटूथ नेकबँड" style="background:#f0f9ff; border-color:#7dd3fc; color:#0369a1; font-weight:700;">📱 Budget Gadgets</button>
           <button type="button" class="preset-btn" data-lang="en" data-seeds="crop insurance, agriculture scheme, weather forecast, tractor subsidy">🌐 English Agri</button>
           <button type="button" class="preset-btn" data-lang="ta" data-seeds="வணக்கம், செலவு, வேலை வாய்ப்பு">🏛️ Tamil General</button>
           <button type="button" class="preset-btn" id="expand-indic-seeds-btn" style="background: #fff7ed; border-color: #fdba74; color: #c2410c; font-weight: 700;" title="Use Groq AI to find authentic search phrases in Hindi, Marathi, and English">🌐 Expand Indic (AI)</button>
@@ -120,6 +123,12 @@
             <input type="checkbox" id="latin-exp-toggle">
             <span class="custom-checkbox"></span>
             Include Latin (A-Z) Expansion
+          </label>
+
+          <label class="checkbox-label" for="commercial-exp-toggle" title="Probes Google autocomplete with authentic Indian commercial &amp; affiliate modifiers (किंमत, वॉरंटी, अनुदान, खरे की खोटे, vs, च्या आत)">
+            <input type="checkbox" id="commercial-exp-toggle">
+            <span class="custom-checkbox"></span>
+            🛒 Indian Commercial Probing (Affiliate Intent)
           </label>
 
           <div class="budget-limit-group">
@@ -215,6 +224,7 @@
                 <th data-sort="demand" title="Click any demand score to view transparent formula breakdown">Demand Index <span class="sort-icon">↕</span></th>
                 <th data-sort="evidence" title="Strong (>=0.50), Moderate (>=0.25), Weak (<0.25)">Demand Evidence <span class="sort-icon">↕</span></th>
                 <th data-sort="intent" title="Search intent inferred from wording">Intent <span class="sort-icon">↕</span></th>
+                <th data-sort="buyer_intent" title="Commercial &amp; affiliate intent density (price, warranty, subsidy, vs, trust)">Buyer Intent <span class="sort-icon">↕</span></th>
                 <th data-sort="breadth" title="Expansion breadth (50% weight)">Breadth (50%) <span class="sort-icon">↕</span></th>
                 <th data-sort="coverage" title="Head presence (25% weight)">Coverage (25%) <span class="sort-icon">↕</span></th>
                 <th data-sort="density" title="Question density (15% weight)">Density (15%) <span class="sort-icon">↕</span></th>
@@ -556,6 +566,7 @@
         <span style="font-size: 0.8rem; color: #7c6853;">💡 <strong>Promise:</strong> Praman turns measured research into an evidence-grounded editorial blueprint.</span>
         <div style="display: flex; gap: 8px;">
           <button type="button" class="btn btn-outline btn-sm" id="blueprint-copy-schema-btn">📋 Copy FAQ Schema</button>
+          <button type="button" class="btn btn-outline btn-sm" id="blueprint-copy-product-schema-btn" style="display: none; background: #ecfdf5; border-color: #10b981; color: #065f46; font-weight: 700;">📋 Copy Product Schema</button>
           <button type="button" class="btn btn-primary btn-sm" id="blueprint-copy-md-btn">📋 Copy Markdown</button>
         </div>
       </div>

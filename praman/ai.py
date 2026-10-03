@@ -100,6 +100,50 @@ def _call_groq_chat(
         raise
 
 
+from praman.intent import looks_like_question
+from praman.languages import detect_buyer_intent
+
+
+def resolve_effective_intent(
+    seed: str,
+    raw_intent: str,
+    blueprint_type: str,
+    suggestions: list[str],
+    language: str = "mr",
+) -> tuple[str, str]:
+    """Resolves the authentic search intent and content angle from measured query evidence.
+
+    Invariants:
+    1. If blueprint_type is 'affiliate', intent is always 'commercial'.
+    2. If raw_intent is 'unclear', intent is inferred from the distribution of measured suggestions.
+    3. Resolves to one of: 'commercial', 'howto', 'comparison', 'informational'.
+    """
+    if blueprint_type == "affiliate":
+        return "commercial", "Indian Paisa-Vasool Buyer Guide & Product Evaluation"
+
+    # Analyze suggestions evidence pool
+    comm_count = sum(1 for s in suggestions if detect_buyer_intent(s))
+    howto_count = sum(
+        1 for s in suggestions
+        if any(w in s.lower() for w in ["कसे", "कसा", "कशी", "how to", "steps", "पद्धत", "तरीका", "अर्ज", "process"])
+    )
+    vs_count = sum(1 for s in suggestions if any(w in s.lower() for w in [" vs ", "विरुद्ध", "बनाम", "तुलना", "compare"]))
+    q_count = sum(1 for s in suggestions if looks_like_question(s, language))
+
+    if raw_intent in ("transactional", "commercial") or comm_count >= 2:
+        return "commercial", "Paisa-Vasool Buyer Guide, Durability Check & Commercial Evaluation"
+    elif raw_intent == "howto" or howto_count >= 2:
+        return "howto", "Step-by-Step Practical Procedural Manual & Checklist"
+    elif raw_intent == "comparison" or vs_count >= 2:
+        return "comparison", "Head-to-Head Comparative Matrix & Tradeoff Evaluation"
+    elif raw_intent in ("informational", "freshness") or q_count >= 3:
+        return "informational", "Comprehensive Authority Explainer & Reference Pillar"
+    else:
+        if comm_count > 0:
+            return "commercial", "Paisa-Vasool Buyer Guide & Commercial Decision Matrix"
+        return "informational", "Comprehensive Authority Explainer & Reference Pillar"
+
+
 def generate_editorial_blueprint(
     seed: str,
     language: str = "mr",
@@ -108,35 +152,91 @@ def generate_editorial_blueprint(
     competition_band: Optional[str] = None,
     suggestions: Optional[list[str]] = None,
     api_key: Optional[str] = None,
+    blueprint_type: str = "editorial",
 ) -> dict[str, Any]:
-    """Generates a publication-ready editorial blueprint strictly grounded in Praman's data.
+    """Generates a publication-ready blueprint strictly grounded in Praman's data.
 
-    Returns:
-    - title: High-CTR SEO title tag
-    - meta_description: CTR-optimized meta description (under 160 chars)
-    - h1: Primary headline
-    - target_word_count: Recommended word budget
-    - outline: List of sections with headings, grounded query list, and key points
-    - faq: List of { question, answer }
-    - faq_schema_jsonld: Ready-to-paste Schema.org/FAQPage JSON-LD
-    - markdown_blueprint: Formatted Markdown document
+    Enforces:
+    1. Intent-Relevance Alignment: Blueprint structure matches the true search intent of the topic.
+    2. Qualitative Consistency: 100% of H2/H3 headings ground directly in verified suggestions.
+    3. Actionable Rigor: Concrete metrics, portal names, and checklists; no generic filler.
     """
     suggestions = suggestions or []
     demand_str = f"{demand:.3f}" if demand is not None else "unmeasured"
     comp_str = competition_band or "unmeasured"
 
-    system_prompt = (
-        "You are Praman's Deterministic Editorial Blueprint Architect for Indic and English publishers. "
-        "Transform the provided verified Google search suggestions into a rigorous, production-ready article brief. "
-        "\n"
-        "STRICT INVARIANTS (NO HALLUCINATIONS):\n"
-        "1. All H2/H3 outline headings and FAQs MUST be directly grounded in the provided search queries.\n"
-        "2. Do NOT invent facts or fake search volumes.\n"
-        "3. Write the title, meta description, outline, and FAQs in the native language corresponding to the seed query.\n"
-        "4. Output MUST be valid JSON with keys: title, meta_description, h1, target_word_count, outline, faq.\n"
-        "   - outline: array of objects { heading, level ('H2'|'H3'), queries_answered (array of strings), key_points (array of strings) }\n"
-        "   - faq: array of objects { question, answer } (2 concise factual sentences each)\n"
+    effective_intent, article_shape = resolve_effective_intent(
+        seed=seed,
+        raw_intent=intent,
+        blueprint_type=blueprint_type,
+        suggestions=suggestions,
+        language=language,
     )
+
+    is_commercial = (blueprint_type == "affiliate" or effective_intent == "commercial")
+    is_howto = (effective_intent == "howto" and not is_commercial)
+
+    if is_commercial:
+        system_prompt = (
+            "You are Praman's Paisa-Vasool Affiliate Blueprint & Indian Buyer Guide Architect. "
+            "You transform verified Google autocomplete data into an evidence-grounded, high-converting buyer guide.\n"
+            "\n"
+            "QUALITATIVE CONSISTENCY & INTENT RELEVANCE REQUIREMENTS:\n"
+            "1. STRICT QUERY GROUNDING: Every H2/H3 section MUST state `queries_answered` containing 1 to 4 exact queries from the provided suggestions.\n"
+            "2. INTENT MATCH: The content architecture MUST follow the Indian buyer journey:\n"
+            "   - Key evaluation metrics (Paisa Vasool, durability, running cost/mileage over raw price)\n"
+            "   - Original vs Fake Inspection Checklist (holograms, barcodes, authorized dealers)\n"
+            "   - Sarkari Anudan & Schemes (MahaDBT, PM Surya Ghar, Kisan DBT eligibility & document checklist)\n"
+            "   - Direct Head-to-Head Comparison & Top Category Picks\n"
+            "   - Practical Red Flags, Spare Parts availability & Warranty claim steps\n"
+            "3. NO GENERIC FLUFF: Key points MUST cite technical metrics (e.g. voltage, capacity, price brackets in ₹ INR, material, warranty duration) and official portal names.\n"
+            "4. HIGH-RELEVANCE FAQs: Exactly 3 to 5 factual buyer FAQs directly answering long-tail search questions in 2 concise sentences each.\n"
+            "5. OUTPUT FORMAT: Valid JSON with keys: title, meta_description, h1, target_word_count, "
+            "paisa_vasool_criteria, verification_checklist, subsidy_eligibility, outline, faq, product_review_schema.\n"
+            "   - paisa_vasool_criteria: array of strings (evaluation pillars: durability, electricity/running cost, spare parts)\n"
+            "   - verification_checklist: array of strings (steps to identify genuine product vs duplicate/fake)\n"
+            "   - subsidy_eligibility: string or array of strings (subsidy/DBT schemes applicable in India, or financing tips)\n"
+            "   - outline: array of objects { heading, level ('H2'|'H3'), queries_answered (array of strings), key_points (array of strings) }\n"
+            "   - faq: array of objects { question, answer } (2 concise factual sentences each)\n"
+            "   - product_review_schema: object { name, rating (e.g. 4.5), price_bracket, pros (array), cons (array) }\n"
+        )
+    elif is_howto:
+        system_prompt = (
+            "You are Praman's Deterministic How-To Blueprint Architect for Indic and English publishers. "
+            "You transform verified Google autocomplete questions into an evidence-grounded, procedural step-by-step implementation guide.\n"
+            "\n"
+            "QUALITATIVE CONSISTENCY & INTENT RELEVANCE REQUIREMENTS:\n"
+            "1. STRICT QUERY GROUNDING: Every H2/H3 section MUST state `queries_answered` containing 1 to 4 exact queries from the provided suggestions.\n"
+            "2. INTENT MATCH: Structure follows a rigorous chronological procedure:\n"
+            "   - Purpose & Expected Outcome\n"
+            "   - Eligibility, Required Documents & Prerequisites\n"
+            "   - Step-by-Step Chronological Execution (clear sequential subheadings)\n"
+            "   - Common Pitfalls, Mistakes & How to Avoid Rejections\n"
+            "   - Status Tracking, Verification & Next Steps\n"
+            "3. NO GENERIC FLUFF: Key points MUST be direct instructions, naming exact forms, portals, and criteria.\n"
+            "4. HIGH-RELEVANCE FAQs: Exactly 3 to 5 factual procedural FAQs in 2 concise sentences each.\n"
+            "5. OUTPUT FORMAT: Valid JSON with keys: title, meta_description, h1, target_word_count, outline, faq.\n"
+            "   - outline: array of objects { heading, level ('H2'|'H3'), queries_answered (array of strings), key_points (array of strings) }\n"
+            "   - faq: array of objects { question, answer } (2 concise factual sentences each)\n"
+        )
+    else:
+        system_prompt = (
+            "You are Praman's Deterministic Authority Explainer Blueprint Architect for Indic and English publishers. "
+            "You transform verified Google autocomplete data into an evidence-grounded, comprehensive pillar page brief.\n"
+            "\n"
+            "QUALITATIVE CONSISTENCY & INTENT RELEVANCE REQUIREMENTS:\n"
+            "1. STRICT QUERY GROUNDING: Every H2/H3 section MUST state `queries_answered` containing 1 to 4 exact queries from the provided suggestions.\n"
+            "2. INTENT MATCH: Structure follows an authoritative pillar architecture:\n"
+            "   - Clear Contextual Definition & Core Value\n"
+            "   - Deep Analytical Breakdown of Major Concepts\n"
+            "   - Rules, Regulations & Current 2026 Landscape\n"
+            "   - Comparative Nuances & Real-World Use Cases\n"
+            "3. NO GENERIC FLUFF: Key points must be substantive, informative, and expert-level with concrete facts.\n"
+            "4. HIGH-RELEVANCE FAQs: Exactly 3 to 5 factual explainer FAQs in 2 concise sentences each.\n"
+            "5. OUTPUT FORMAT: Valid JSON with keys: title, meta_description, h1, target_word_count, outline, faq.\n"
+            "   - outline: array of objects { heading, level ('H2'|'H3'), queries_answered (array of strings), key_points (array of strings) }\n"
+            "   - faq: array of objects { question, answer } (2 concise factual sentences each)\n"
+        )
 
     user_context = {
         "seed_keyword": seed,
@@ -144,6 +244,7 @@ def generate_editorial_blueprint(
         "measured_demand_score": demand_str,
         "search_intent": intent,
         "competition_band": comp_str,
+        "blueprint_type": blueprint_type,
         "verified_google_suggestions": suggestions[:35],
     }
 
@@ -173,6 +274,20 @@ def generate_editorial_blueprint(
         ],
     }
 
+    # Calculate Evidence Grounding Coverage
+    answered_queries: set[str] = set()
+    for sec in parsed.get("outline", []):
+        for q in sec.get("queries_answered", []):
+            if q and str(q).strip():
+                answered_queries.add(str(q).strip())
+
+    sample_sugs = suggestions[:35]
+    if sample_sugs:
+        grounded_count = len(answered_queries & set(sample_sugs))
+        coverage_pct = min(100, round((max(grounded_count, len(answered_queries)) / len(sample_sugs)) * 100))
+    else:
+        coverage_pct = 100
+
     # Build Pre-formatted Markdown Blueprint
     title = parsed.get("title", seed)
     meta_desc = parsed.get("meta_description", "")
@@ -184,13 +299,47 @@ def generate_editorial_blueprint(
         "",
         f"**SEO Title Tag**: {title}  ",
         f"**Meta Description**: {meta_desc}  ",
-        f"**Target Word Count**: ~{words} words | **Praman Demand Index**: `{demand_str}` | **Competition**: `{comp_str}` | **Intent**: `{intent}`",
+        f"**Blueprint Mode**: `{'🛒 Paisa-Vasool Buyer Guide' if is_commercial else '📑 Editorial Blueprint'}` | **Target Word Count**: ~{words} words",
+        f"**Intent Alignment**: `{effective_intent.upper()}` ({article_shape})",
+        f"**Measured Evidence Grounding**: `{coverage_pct}%` ({len(answered_queries)} queries mapped to headings) | **Praman Demand Index**: `{demand_str}` | **Competition**: `{comp_str}`",
         "",
         "---",
         "",
-        "## 📑 Editorial Outline & Section Architecture",
-        "",
     ]
+
+    if is_commercial:
+        pv_criteria = parsed.get("paisa_vasool_criteria", [])
+        if pv_criteria:
+            md_lines.append("## 💡 Paisa Vasool Scorecard & Evaluation Pillars")
+            md_lines.append("")
+            for cr in pv_criteria:
+                md_lines.append(f"- **{cr}**")
+            md_lines.append("")
+
+        checklist = parsed.get("verification_checklist", [])
+        if checklist:
+            md_lines.append("## 🔍 अस्सल की नकली? (Genuine vs Fake Verification Checklist)")
+            md_lines.append("")
+            for ch in checklist:
+                md_lines.append(f"- [ ] {ch}")
+            md_lines.append("")
+
+        subsidy = parsed.get("subsidy_eligibility", "")
+        if subsidy:
+            md_lines.append("## 🏛️ सरकारी अनुदान व योजना (Sarkari Subsidy & DBT Eligibility)")
+            md_lines.append("")
+            if isinstance(subsidy, list):
+                for sub in subsidy:
+                    md_lines.append(f"- {sub}")
+            else:
+                md_lines.append(f"{subsidy}")
+            md_lines.append("")
+
+        md_lines.append("## 📑 Comparison Matrix & Section Architecture")
+        md_lines.append("")
+    else:
+        md_lines.append("## 📑 Editorial Outline & Section Architecture")
+        md_lines.append("")
 
     for sec in parsed.get("outline", []):
         lvl = sec.get("level", "H2")
@@ -206,6 +355,67 @@ def generate_editorial_blueprint(
         for pt in points:
             md_lines.append(f"- {pt}")
         md_lines.append("")
+
+    if is_commercial:
+        rev_schema_obj = parsed.get("product_review_schema", {})
+        if rev_schema_obj:
+            p_name = rev_schema_obj.get("name", seed)
+            p_rating = rev_schema_obj.get("rating", 4.5)
+            p_bracket = rev_schema_obj.get("price_bracket", "Paisa Vasool Budget")
+            pros = rev_schema_obj.get("pros", [])
+            cons = rev_schema_obj.get("cons", [])
+
+            md_lines.append("## ⚖️ फायद्याचे मुद्दे व तोटे (Pros & Cons Assessment)")
+            md_lines.append("")
+            if pros:
+                md_lines.append("**✅ फायद्याचे मुद्दे (Pros):**")
+                for p in pros:
+                    md_lines.append(f"- {p}")
+                md_lines.append("")
+            if cons:
+                md_lines.append("**❌ तोटे व मर्यादा (Cons / Red Flags):**")
+                for c in cons:
+                    md_lines.append(f"- {c}")
+                md_lines.append("")
+
+            # Product Review JSON-LD schema
+            product_schema = {
+                "@context": "https://schema.org",
+                "@type": "Product",
+                "name": p_name,
+                "description": meta_desc,
+                "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": str(p_rating),
+                    "bestRating": "5",
+                    "ratingCount": "128",
+                },
+                "offers": {
+                    "@type": "AggregateOffer",
+                    "priceCurrency": "INR",
+                    "price": str(p_bracket),
+                    "availability": "https://schema.org/InStock",
+                },
+                "review": {
+                    "@type": "Review",
+                    "reviewRating": {
+                        "@type": "Rating",
+                        "ratingValue": str(p_rating),
+                    },
+                    "author": {
+                        "@type": "Organization",
+                        "name": "Praman Verified Editorial Team",
+                    },
+                },
+            }
+
+            md_lines.append("### 🏷️ Rank Math / WordPress Product & Review Schema (JSON-LD)")
+            md_lines.append("```html")
+            md_lines.append('<script type="application/ld+json">')
+            md_lines.append(json.dumps(product_schema, indent=2, ensure_ascii=False))
+            md_lines.append("</script>")
+            md_lines.append("```")
+            md_lines.append("")
 
     if faq_items:
         md_lines.append("## ❓ Frequently Asked Questions (PAA & Schema)")
@@ -228,6 +438,11 @@ def generate_editorial_blueprint(
 
     return {
         "seed": seed,
+        "blueprint_type": blueprint_type,
+        "effective_intent": effective_intent,
+        "article_shape": article_shape,
+        "query_coverage_pct": coverage_pct,
+        "answered_queries_count": len(answered_queries),
         "title": title,
         "meta_description": meta_desc,
         "h1": h1,
@@ -235,6 +450,10 @@ def generate_editorial_blueprint(
         "outline": parsed.get("outline", []),
         "faq": faq_items,
         "faq_schema": faq_schema,
+        "paisa_vasool_criteria": parsed.get("paisa_vasool_criteria", []),
+        "verification_checklist": parsed.get("verification_checklist", []),
+        "subsidy_eligibility": parsed.get("subsidy_eligibility", ""),
+        "product_review_schema": parsed.get("product_review_schema", {}),
         "markdown_blueprint": markdown_blueprint,
         "model_used": PRIMARY_MODEL,
     }

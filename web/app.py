@@ -39,6 +39,7 @@ def _handle_research_request(payload: dict[str, Any]) -> dict[str, Any]:
     language = payload.get("language", "mr")
     mode_str = payload.get("mode", "fixture")
     latin_expansion = bool(payload.get("latin_expansion", False))
+    commercial_expansion = bool(payload.get("commercial_expansion", False))
     max_queries = payload.get("max_queries")
     if max_queries:
         max_queries = int(max_queries)
@@ -47,6 +48,7 @@ def _handle_research_request(payload: dict[str, Any]) -> dict[str, Any]:
         language=language,
         mode=Mode(mode_str),
         latin_expansion=latin_expansion,
+        commercial_expansion=commercial_expansion,
         max_queries=max_queries,
     )
 
@@ -96,6 +98,10 @@ def _handle_research_request(payload: dict[str, Any]) -> dict[str, Any]:
                 "article_shape": s.intent.article_shape,
                 "axes": s.raw_axes,
                 "components": s.components,
+                "buyer_intent": {
+                    "score": s.signals.buyer_intent_score,
+                    "aspects": s.signals.buyer_intent_aspects,
+                },
                 "competition": {
                     "band": s.competition.band if s.competition else None,
                     "recorded_count": s.competition.recorded_count if s.competition else 0,
@@ -109,6 +115,8 @@ def _handle_research_request(payload: dict[str, Any]) -> dict[str, Any]:
                     "discovered": s.signals.discovered[:50],
                     "research_candidates": s.signals.research_candidates,
                     "raw_observations": s.signals.raw_observations,
+                    "buyer_intent_score": s.signals.buyer_intent_score,
+                    "buyer_intent_aspects": s.signals.buyer_intent_aspects,
                 },
             }
             for s in result.scores
@@ -203,6 +211,7 @@ try:
                 competition_band=payload.get("competition_band"),
                 suggestions=payload.get("suggestions", []),
                 api_key=payload.get("groq_api_key"),
+                blueprint_type=payload.get("blueprint_type", "editorial"),
             )
         except Exception as e:
             logger.exception("Error generating blueprint")
@@ -349,6 +358,7 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                         competition_band=payload.get("competition_band"),
                         suggestions=payload.get("suggestions", []),
                         api_key=client_key,
+                        blueprint_type=payload.get("blueprint_type", "editorial"),
                     )
                     self._send_json(res)
                 except Exception as e:

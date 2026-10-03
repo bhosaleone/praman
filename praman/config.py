@@ -60,6 +60,7 @@ class Settings:
     max_queries: Optional[int] = None       # Query budget ceiling
     suggestions_per_query: int = 10         # Capped at 1..10 by Google
     latin_expansion: bool = False           # Add Latin A-Z expansion to native seeds
+    commercial_expansion: bool = False      # Add Indian commercial & affiliate modifier probes
     cache_dir: Path = field(default_factory=lambda: Path(".praman_cache"))
     recorded_file: Optional[Path] = None    # Path to recorded.json if mode=RECORDED
     weights: Weights = field(default_factory=Weights)

@@ -12,7 +12,7 @@ Calculates expected counts and manages truncation flags according to MATH.md §4
 from dataclasses import dataclass, field
 from typing import Optional
 
-from praman.languages import LATIN_ALPHABET, get_language_spec
+from praman.languages import LATIN_ALPHABET, get_commercial_modifiers, get_language_spec
 from praman.script import dedup_key, script_of
 
 
@@ -21,8 +21,8 @@ class ExpansionQuery:
     """A single query to be issued to autocomplete."""
     query: str
     seed: str
-    kind: str           # 'head', 'alphabet', 'modifier', 'question'
-    tag: str            # e.g. letter 'क', modifier 'pdf', question 'काय'
+    kind: str           # 'head', 'alphabet', 'modifier', 'question', 'commercial'
+    tag: str            # e.g. letter 'क', modifier 'pdf', question 'काय', commercial 'commercial_price'
 
 
 @dataclass
@@ -44,6 +44,7 @@ def expected_expansion_count(
     seed: str,
     language_code: str = "mr",
     latin_expansion: bool = False,
+    commercial_expansion: bool = False,
 ) -> int:
     """Calculates the theoretical complete query count for a seed."""
     spec = get_language_spec(language_code)
@@ -53,15 +54,24 @@ def expected_expansion_count(
         alphabet_len += len(LATIN_ALPHABET)
 
     head_count = 1
-    modifier_count = len(spec.modifier_templates)
+    std_mods = {mod for mod, _ in spec.modifier_templates}
+    modifier_count = len(std_mods)
     question_count = len(spec.question_templates)
-    return head_count + alphabet_len + modifier_count + question_count
+
+    if commercial_expansion:
+        comm_mods = {mod for mod, _ in get_commercial_modifiers(language_code)}
+        commercial_count = len(comm_mods - std_mods)
+    else:
+        commercial_count = 0
+
+    return head_count + alphabet_len + modifier_count + question_count + commercial_count
 
 
 def expand_seed(
     seed: str,
     language_code: str = "mr",
     latin_expansion: bool = False,
+    commercial_expansion: bool = False,
 ) -> SeedExpansion:
     """Generates all expansion queries for a seed in deterministic order.
 
@@ -101,7 +111,12 @@ def expand_seed(
         filled = q_tmpl.replace("{t}", clean_seed)
         _add(filled, "question", q_tmpl)
 
-    expected = expected_expansion_count(clean_seed, language_code, latin_expansion)
+    # 5. Commercial & affiliate intent modifier queries (optional)
+    if commercial_expansion:
+        for mod_text, intent_type in get_commercial_modifiers(language_code):
+            _add(f"{clean_seed} {mod_text}", "commercial", intent_type)
+
+    expected = expected_expansion_count(clean_seed, language_code, latin_expansion, commercial_expansion)
     return SeedExpansion(seed=clean_seed, queries=queries, expected_count=expected)
 
 
@@ -119,6 +134,7 @@ def create_expansion_plan(
     seeds: list[str],
     language_code: str = "mr",
     latin_expansion: bool = False,
+    commercial_expansion: bool = False,
     max_seeds: Optional[int] = None,
     max_queries: Optional[int] = None,
 ) -> ExpansionPlan:
@@ -136,7 +152,7 @@ def create_expansion_plan(
     is_truncated_run = False
 
     for seed in seeds_to_process:
-        seed_exp = expand_seed(seed, language_code, latin_expansion)
+        seed_exp = expand_seed(seed, language_code, latin_expansion, commercial_expansion)
 
         if max_queries is None:
             expansions[seed] = seed_exp

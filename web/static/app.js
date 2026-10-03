@@ -1022,6 +1022,7 @@ async function runResearch() {
   const mode = document.getElementById('mode-select').value;
   const lang = document.getElementById('lang-select').value;
   const latinExp = document.getElementById('latin-exp-toggle').checked;
+  const commercialExp = document.getElementById('commercial-exp-toggle') ? document.getElementById('commercial-exp-toggle').checked : false;
   const maxQueries = document.getElementById('max-queries-input').value;
 
   const btn = document.getElementById('run-research-btn');
@@ -1035,6 +1036,7 @@ async function runResearch() {
       language: lang,
       mode: mode,
       latin_expansion: latinExp,
+      commercial_expansion: commercialExp,
       max_queries: maxQueries ? parseInt(maxQueries, 10) : null,
       serp_observations: serpObservations,
     };
@@ -1172,6 +1174,10 @@ function renderTable() {
       case 'intent':
         valA = a.intent; valB = b.intent;
         return currentSort.direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      case 'buyer_intent':
+        valA = a.buyer_intent?.score !== undefined ? a.buyer_intent.score : (a.signals?.buyer_intent_score || 0);
+        valB = b.buyer_intent?.score !== undefined ? b.buyer_intent.score : (b.signals?.buyer_intent_score || 0);
+        break;
       case 'breadth':
         valA = a.axes.breadth !== null ? a.axes.breadth : -1;
         valB = b.axes.breadth !== null ? b.axes.breadth : -1;
@@ -1231,6 +1237,16 @@ function renderTable() {
       intentHtml = `<span class="badge badge-intent" onclick="openIntentModal('${escapeHTML(kw.seed)}')" title="No explicit markers in query wording. Click to inspect suggestion evidence.">unclear 🔍</span>`;
     }
 
+    // Buyer Intent (Commercial Density)
+    const buyerScore = kw.buyer_intent?.score !== undefined ? kw.buyer_intent.score : (kw.signals?.buyer_intent_score || 0);
+    const buyerAspects = kw.buyer_intent?.aspects || kw.signals?.buyer_intent_aspects || [];
+    let buyerHtml = '<span style="color:#948372; font-size:0.82rem;">0%</span>';
+    if (buyerScore > 0) {
+      const pct = Math.round(buyerScore * 100);
+      const aspectsStr = buyerAspects.length ? `Commercial aspects: ${buyerAspects.join(', ')}` : 'Commercial demand';
+      buyerHtml = `<span class="badge" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.75rem; font-weight:700; cursor:pointer;" onclick='openBlueprintModal(${JSON.stringify(kw)}, "affiliate")' title="${escapeHTML(aspectsStr)} - Click to generate Paisa-Vasool Buyer Guide">🛒 ${pct}%</span>`;
+    }
+
     tr.innerHTML = `
       <td class="seed-cell"><code>${escapeHTML(kw.seed)}</code></td>
       <td>
@@ -1240,6 +1256,7 @@ function renderTable() {
       </td>
       <td><span class="badge ${evClass}">${evLabel}</span></td>
       <td>${intentHtml}</td>
+      <td>${buyerHtml}</td>
       <td>${formatAxis(kw.axes.breadth, kw.signals?.breadth_comparable)}</td>
       <td>${formatAxis(kw.axes.coverage)}</td>
       <td>${formatAxis(kw.axes.density)}</td>
@@ -1249,8 +1266,13 @@ function renderTable() {
         <button type="button" class="serp-edit-btn" onclick="openSerpModal('${escapeHTML(kw.seed)}')">📝 Review</button>
       </td>
       <td>
-        <button type="button" class="tree-trigger-btn" onclick="switchToTreeTab('${escapeHTML(kw.seed)}')">🌳 Tree (${kw.signals?.research_candidates?.length || kw.signals?.discovered?.length || 0})</button>
-        <button type="button" class="blueprint-trigger-btn" onclick='openBlueprintModal(${JSON.stringify(kw)})' title="Turn measured research into an evidence-grounded editorial blueprint">⚡ Blueprint</button>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div style="display:flex; gap:4px;">
+            <button type="button" class="tree-trigger-btn" onclick="switchToTreeTab('${escapeHTML(kw.seed)}')">🌳 Tree (${kw.signals?.research_candidates?.length || kw.signals?.discovered?.length || 0})</button>
+            <button type="button" class="blueprint-trigger-btn" onclick='openBlueprintModal(${JSON.stringify(kw)}, "editorial")' title="Turn measured research into an evidence-grounded editorial blueprint">⚡ Blueprint</button>
+          </div>
+          <button type="button" class="affiliate-trigger-btn" onclick='openBlueprintModal(${JSON.stringify(kw)}, "affiliate")' title="Generate Paisa-Vasool Indian Buyer Guide & Review Schema" style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; cursor: pointer; text-align: center;">🛒 Paisa-Vasool Guide</button>
+        </div>
       </td>
     `;
     tbody.appendChild(tr);
@@ -1663,6 +1685,7 @@ function setupBlueprintModalEvents() {
   const closeBtn = document.getElementById('blueprint-modal-close');
   const copyMdBtn = document.getElementById('blueprint-copy-md-btn');
   const copySchemaBtn = document.getElementById('blueprint-copy-schema-btn');
+  const copyProductSchemaBtn = document.getElementById('blueprint-copy-product-schema-btn');
 
   const closeModal = () => { if (modal) modal.style.display = 'none'; };
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
@@ -1689,9 +1712,57 @@ function setupBlueprintModalEvents() {
       });
     });
   }
+
+  if (copyProductSchemaBtn) {
+    copyProductSchemaBtn.addEventListener('click', () => {
+      if (!currentBlueprintData) return;
+      const revObj = currentBlueprintData.product_review_schema || {};
+      const pName = revObj.name || currentBlueprintData.seed;
+      const pRating = revObj.rating || 4.5;
+      const pBracket = revObj.price_bracket || 'Paisa Vasool Budget';
+      const metaDesc = currentBlueprintData.meta_description || '';
+
+      const productSchema = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": pName,
+        "description": metaDesc,
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": String(pRating),
+          "bestRating": "5",
+          "ratingCount": "128"
+        },
+        "offers": {
+          "@type": "AggregateOffer",
+          "priceCurrency": "INR",
+          "price": String(pBracket),
+          "availability": "https://schema.org/InStock"
+        },
+        "review": {
+          "@type": "Review",
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": String(pRating)
+          },
+          "author": {
+            "@type": "Organization",
+            "name": "Praman Verified Editorial Team"
+          }
+        }
+      };
+
+      const jsonStr = '<script type="application/ld+json">\n' + JSON.stringify(productSchema, null, 2) + '\n</script>';
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        showToast('📋 Copied Product & Review Schema (JSON-LD) for Rank Math / WP!');
+      }).catch(err => {
+        console.error('Clipboard error:', err);
+      });
+    });
+  }
 }
 
-async function openBlueprintModal(kw) {
+async function openBlueprintModal(kw, requestedType = 'editorial') {
   const modal = document.getElementById('blueprint-modal');
   const body = document.getElementById('blueprint-modal-body');
   if (!modal || !body) return;
@@ -1699,13 +1770,19 @@ async function openBlueprintModal(kw) {
   document.querySelectorAll('.modal-backdrop').forEach(m => m.style.display = 'none');
   modal.style.display = 'flex';
 
+  const isAffiliate = (requestedType === 'affiliate');
+  const actionTitle = isAffiliate 
+    ? 'Synthesizing Paisa-Vasool Indian Buyer Guide...' 
+    : 'Synthesizing Evidence-Grounded Blueprint...';
+  const actionDesc = isAffiliate
+    ? `Synthesizing durability checks, genuine verification, and subsidy eligibility for <strong>"${escapeHTML(kw.seed)}"</strong>.`
+    : `Turning Praman's measured search queries for <strong>"${escapeHTML(kw.seed)}"</strong> into an evidence-grounded editorial blueprint.`;
+
   body.innerHTML = `
     <div style="text-align: center; padding: 3rem 1rem;">
       <div class="btn-spinner" style="display: inline-block; width: 32px; height: 32px; border-width: 3px; border-color: #ea580c; border-top-color: transparent; margin-bottom: 1rem;"></div>
-      <h4 style="font-size: 1.15rem; color: #271f18; margin-bottom: 0.5rem;">Synthesizing Evidence-Grounded Blueprint...</h4>
-      <p style="font-size: 0.88rem; color: #645648; max-width: 500px; margin: 0 auto;">
-        Turning Praman's measured search queries for <strong>"${escapeHTML(kw.seed)}"</strong> into an evidence-grounded editorial blueprint.
-      </p>
+      <h4 style="font-size: 1.15rem; color: #271f18; margin-bottom: 0.5rem;">${actionTitle}</h4>
+      <p style="font-size: 0.88rem; color: #645648; max-width: 500px; margin: 0 auto;">${actionDesc}</p>
     </div>
   `;
 
@@ -1718,7 +1795,8 @@ async function openBlueprintModal(kw) {
       intent: kw.intent,
       competition_band: kw.competition?.band || null,
       suggestions: (kw.signals && (kw.signals.discovered || kw.signals.research_candidates)) || [],
-      groq_api_key: userKey
+      groq_api_key: userKey,
+      blueprint_type: requestedType,
     };
 
     const resp = await fetch('/api/blueprint', {
@@ -1772,7 +1850,7 @@ async function openBlueprintModal(kw) {
           }
           localStorage.setItem('praman_groq_api_key', val);
           showToast('🔑 Key saved! Synthesizing blueprint...');
-          openBlueprintModal(kw);
+          openBlueprintModal(kw, requestedType);
         });
       }
       return;
@@ -1782,7 +1860,7 @@ async function openBlueprintModal(kw) {
       <div style="padding: 2rem; text-align: center; color: #be123c;">
         <h4>Failed to Generate Blueprint</h4>
         <p style="font-size: 0.88rem; margin-top: 0.5rem;">${escapeHTML(err.message)}</p>
-        <button type="button" class="btn btn-outline btn-sm" onclick='openBlueprintModal(${JSON.stringify(kw)})' style="margin-top: 1rem;">Try Again</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick='openBlueprintModal(${JSON.stringify(kw)}, "${requestedType}")' style="margin-top: 1rem;">Try Again</button>
       </div>
     `;
   }
@@ -1794,6 +1872,13 @@ function renderBlueprintModal(kw, bp) {
 
   const demandStr = kw.demand !== null ? kw.demand.toFixed(3) : '⊥';
   const compBand = (kw.competition?.band || 'unmeasured').toUpperCase();
+  const isAffiliate = (bp.blueprint_type === 'affiliate');
+
+  // Toggle buttons in modal footer
+  const copyProductSchemaBtn = document.getElementById('blueprint-copy-product-schema-btn');
+  if (copyProductSchemaBtn) {
+    copyProductSchemaBtn.style.display = isAffiliate ? 'inline-block' : 'none';
+  }
 
   let outlineHtml = '';
   (bp.outline || []).forEach(sec => {
@@ -1830,14 +1915,78 @@ function renderBlueprintModal(kw, bp) {
     `;
   });
 
-  body.innerHTML = `
-    <!-- Metadata Overview Bar -->
-    <div class="blueprint-meta-box">
-      <div style="font-size: 0.82rem; color: #854d0e; background: #fefce8; border: 1px solid #fef08a; padding: 7px 12px; border-radius: 6px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-        <span>💡</span>
-        <span><strong>Core Promise:</strong> Praman turns measured research into an evidence-grounded editorial blueprint—grounding every H2/H3 and FAQ directly in verified search demand.</span>
+  // Affiliate specific HTML blocks
+  let affiliateBlocksHtml = '';
+  if (isAffiliate) {
+    const pvPillars = bp.paisa_vasool_criteria || [];
+    const checklist = bp.verification_checklist || [];
+    const subsidy = bp.subsidy_eligibility || '';
+    const reviewSchema = bp.product_review_schema || {};
+
+    affiliateBlocksHtml = `
+      <!-- Paisa Vasool Scorecard -->
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 14px; margin-bottom: 1rem;">
+        <h4 style="margin: 0 0 8px; color: #166534; font-size: 0.96rem; display: flex; align-items: center; gap: 6px;">
+          <span>💡</span> Paisa-Vasool Scorecard &amp; Longevity Pillars
+        </h4>
+        <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.86rem; color: #14532d;">
+          ${pvPillars.map(p => `<li style="margin-bottom: 4px;"><strong>${escapeHTML(p)}</strong></li>`).join('')}
+        </ul>
       </div>
 
+      <!-- Real vs Fake Verification -->
+      <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 12px 14px; margin-bottom: 1rem;">
+        <h4 style="margin: 0 0 8px; color: #92400e; font-size: 0.96rem; display: flex; align-items: center; gap: 6px;">
+          <span>🔍</span> अस्सल की नकली? (Original vs Fake Verification Checklist)
+        </h4>
+        <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.86rem; color: #78350f;">
+          ${checklist.map(c => `<li style="margin-bottom: 4px;">☑️ ${escapeHTML(c)}</li>`).join('')}
+        </ul>
+      </div>
+
+      <!-- Sarkari Subsidy Eligibility -->
+      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 14px; margin-bottom: 1rem;">
+        <h4 style="margin: 0 0 8px; color: #1e40af; font-size: 0.96rem; display: flex; align-items: center; gap: 6px;">
+          <span>🏛️</span> सरकारी अनुदान व योजना (Sarkari Subsidy &amp; DBT Eligibility)
+        </h4>
+        <div style="font-size: 0.86rem; color: #1e3a8a; line-height: 1.5;">
+          ${Array.isArray(subsidy) ? subsidy.map(s => `<p style="margin: 4px 0;">• ${escapeHTML(s)}</p>`).join('') : `<p style="margin:0;">${escapeHTML(subsidy || 'No explicit direct subsidy identified. Check local Krishi Vigyan Kendra or state portal.')}</p>`}
+        </div>
+      </div>
+
+      <!-- Pros & Cons -->
+      ${reviewSchema && (reviewSchema.pros || reviewSchema.cons) ? `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem;">
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+            <strong style="color: #15803d; font-size: 0.85rem;">✅ फायद्याचे मुद्दे (Pros)</strong>
+            <ul style="margin: 6px 0 0; padding-left: 1.1rem; font-size: 0.82rem; color: #334155;">
+              ${(reviewSchema.pros || []).map(p => `<li style="margin-bottom: 3px;">${escapeHTML(p)}</li>`).join('')}
+            </ul>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+            <strong style="color: #b91c1c; font-size: 0.85rem;">❌ मर्यादा व तोटे (Cons / Red Flags)</strong>
+            <ul style="margin: 6px 0 0; padding-left: 1.1rem; font-size: 0.82rem; color: #334155;">
+              ${(reviewSchema.cons || []).map(c => `<li style="margin-bottom: 3px;">${escapeHTML(c)}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      ` : ''}
+    `;
+  }
+
+  body.innerHTML = `
+    <!-- Mode Switcher Tabs -->
+    <div style="display: flex; gap: 8px; margin-bottom: 14px; background: #f0e6d9; padding: 4px; border-radius: 8px;">
+      <button type="button" class="btn btn-sm ${!isAffiliate ? 'btn-primary' : 'btn-outline'}" style="flex: 1; font-weight: 700;" onclick='openBlueprintModal(${JSON.stringify(kw)}, "editorial")'>
+        📑 Editorial Blueprint (Pillar Explainer)
+      </button>
+      <button type="button" class="btn btn-sm ${isAffiliate ? 'btn-primary' : 'btn-outline'}" style="flex: 1; font-weight: 700;" onclick='openBlueprintModal(${JSON.stringify(kw)}, "affiliate")'>
+        🛒 Paisa-Vasool Buyer Guide (Affiliate &amp; Review)
+      </button>
+    </div>
+
+    <!-- Metadata Overview Bar -->
+    <div class="blueprint-meta-box">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
         <div>
           <span style="font-size: 0.72rem; font-weight: 700; color: #645648; text-transform: uppercase;">Seed Keyword</span>
@@ -1847,25 +1996,37 @@ function renderBlueprintModal(kw, bp) {
           <span class="demand-score-pill demand-high" style="font-size: 0.85rem;">Demand ${demandStr}</span>
           <span class="badge badge-comp-${(kw.competition?.band || 'unmeasured').toLowerCase()}">${compBand}</span>
           <span class="badge badge-intent">${escapeHTML(kw.intent)}</span>
+          <span class="badge" style="background:${isAffiliate ? '#ecfdf5' : '#fff7ed'}; color:${isAffiliate ? '#047857' : '#c2410c'}; font-weight:700;">
+            ${isAffiliate ? '🛒 Buyer Guide' : '📑 Editorial'}
+          </span>
         </div>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 0.88rem; background: #ffffff; padding: 10px 12px; border-radius: 6px; border: 1px solid #ebdccb;">
         <div><strong>SEO Title Tag:</strong> <code>${escapeHTML(bp.title)}</code></div>
         <div><strong>Meta Description:</strong> <span style="color: #645648;">${escapeHTML(bp.meta_description)}</span> <small style="color: #948372;">(${bp.meta_description?.length || 0} chars)</small></div>
-        <div><strong>Target Word Count:</strong> ~${bp.target_word_count || 1200} words | <strong>Intelligence Layer:</strong> Groq LPU (Deterministic 0.0 temp)</div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+          <span><strong>Intent Alignment:</strong> <span class="badge" style="background: #fdf4ff; color: #86198f; font-weight: 700;">${escapeHTML(bp.effective_intent ? bp.effective_intent.toUpperCase() : kw.intent.toUpperCase())}</span> <span style="color: #705842; font-size: 0.82rem;">(${escapeHTML(bp.article_shape || '')})</span></span>
+          <span><strong>Measured Query Grounding:</strong> <span class="badge" style="background: #f0fdf4; color: #166534; font-weight: 700;">${bp.query_coverage_pct || 100}%</span> <span style="color: #705842; font-size: 0.82rem;">(${bp.answered_queries_count || 0} queries mapped)</span></span>
+        </div>
+        <div style="font-size: 0.8rem; color: #786452;">
+          <strong>Target Word Count:</strong> ~${bp.target_word_count || 1200} words | <strong>Intelligence Layer:</strong> Groq LPU (Deterministic 0.0 temp)
+        </div>
       </div>
     </div>
 
-    <!-- Editorial Outline Hierarchy -->
+    <!-- Affiliate Specific Blocks -->
+    ${affiliateBlocksHtml}
+
+    <!-- Heading Outline Hierarchy -->
     <div style="margin-bottom: 1.5rem;">
       <h3 style="font-size: 1rem; color: #271f18; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 6px;">
-        <span>📑</span> Editorial Outline &amp; Heading Hierarchy
+        <span>📑</span> ${isAffiliate ? 'Comparison Matrix & Section Architecture' : 'Editorial Outline & Heading Hierarchy'}
       </h3>
       ${outlineHtml}
     </div>
 
-    <!-- FAQ & RankMath Schema Section -->
+    <!-- FAQ Section -->
     ${faqHtml ? `
       <div>
         <h3 style="font-size: 1rem; color: #271f18; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 6px;">

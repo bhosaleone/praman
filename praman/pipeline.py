@@ -26,6 +26,7 @@ def run_research(
         seeds=list(seeds),
         language_code=settings.language,
         latin_expansion=settings.latin_expansion,
+        commercial_expansion=settings.commercial_expansion,
         max_seeds=settings.max_seeds,
         max_queries=settings.max_queries,
     )

@@ -17,6 +17,7 @@ from typing import Optional, Sequence
 from praman.autocomplete import AutocompleteResult
 from praman.expand import ExpansionQuery
 from praman.intent import looks_like_question
+from praman.languages import detect_buyer_intent
 from praman.script import dedup_key, script_of
 
 
@@ -40,6 +41,8 @@ class SeedSignals:
     queries_measured: int = 0
     queries_absent: int = 0
     queries_failed: int = 0
+    buyer_intent_score: Optional[float] = None                                # Commercial intent density (0.0 to 1.0)
+    buyer_intent_aspects: list[str] = field(default_factory=list)             # Unique buyer intent dimensions matched
 
 
 def calculate_seed_signals(
@@ -212,6 +215,18 @@ def calculate_seed_signals(
             continue
         research_candidates.append(s)
 
+    # --- 9. Buyer Intent & Commercial Density ---
+    buyer_intent_count = 0
+    buyer_aspects_set: set[str] = set()
+    for s in ordered_seen:
+        cat = detect_buyer_intent(s)
+        if cat:
+            buyer_intent_count += 1
+            buyer_aspects_set.add(cat)
+
+    buyer_intent_score = (buyer_intent_count / len(ordered_seen)) if ordered_seen else 0.0
+    buyer_intent_aspects = sorted(list(buyer_aspects_set))
+
     # Counters
     all_res = [r for r in results.values() if r.query in {q.query for q in queries}]
     queries_asked = len(queries)
@@ -238,4 +253,6 @@ def calculate_seed_signals(
         queries_measured=queries_measured,
         queries_absent=queries_absent,
         queries_failed=queries_failed,
+        buyer_intent_score=buyer_intent_score,
+        buyer_intent_aspects=buyer_intent_aspects,
     )
