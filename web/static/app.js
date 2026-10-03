@@ -148,6 +148,8 @@ function setupEventListeners() {
   setupInspectorModalEvents();
   setupIntentModalEvents();
   setupGuideModalEvents();
+  setupBlueprintModalEvents();
+  setupExpandSeedsEvents();
 }
 
 /* ==========================================================================
@@ -1158,6 +1160,7 @@ function renderTable() {
       </td>
       <td>
         <button type="button" class="tree-trigger-btn" onclick="switchToTreeTab('${escapeHTML(kw.seed)}')">🌳 Tree (${kw.signals?.research_candidates?.length || kw.signals?.discovered?.length || 0})</button>
+        <button type="button" class="blueprint-trigger-btn" onclick='openBlueprintModal(${JSON.stringify(kw)})' title="Synthesize publication-ready article outline & FAQ schema via Groq AI">⚡ Blueprint</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -1548,3 +1551,269 @@ function renderTreeCanvas() {
 
   container.innerHTML = html;
 }
+
+/* ==========================================================================
+   Groq AI Deterministic Blueprint Modal
+   ========================================================================== */
+let currentBlueprintData = null;
+
+function setupBlueprintModalEvents() {
+  const modal = document.getElementById('blueprint-modal');
+  const closeBtn = document.getElementById('blueprint-modal-close');
+  const copyMdBtn = document.getElementById('blueprint-copy-md-btn');
+  const copySchemaBtn = document.getElementById('blueprint-copy-schema-btn');
+
+  const closeModal = () => { if (modal) modal.style.display = 'none'; };
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+  if (copyMdBtn) {
+    copyMdBtn.addEventListener('click', () => {
+      if (!currentBlueprintData || !currentBlueprintData.markdown_blueprint) return;
+      navigator.clipboard.writeText(currentBlueprintData.markdown_blueprint).then(() => {
+        showToast('📋 Copied full Markdown blueprint to clipboard!');
+      }).catch(err => {
+        console.error('Clipboard error:', err);
+      });
+    });
+  }
+
+  if (copySchemaBtn) {
+    copySchemaBtn.addEventListener('click', () => {
+      if (!currentBlueprintData || !currentBlueprintData.faq_schema) return;
+      const jsonStr = '<script type="application/ld+json">\n' + JSON.stringify(currentBlueprintData.faq_schema, null, 2) + '\n</script>';
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        showToast('📋 Copied FAQ Schema (JSON-LD) for Rank Math!');
+      }).catch(err => {
+        console.error('Clipboard error:', err);
+      });
+    });
+  }
+}
+
+async function openBlueprintModal(kw) {
+  const modal = document.getElementById('blueprint-modal');
+  const body = document.getElementById('blueprint-modal-body');
+  if (!modal || !body) return;
+
+  document.querySelectorAll('.modal-backdrop').forEach(m => m.style.display = 'none');
+  modal.style.display = 'flex';
+
+  body.innerHTML = `
+    <div style="text-align: center; padding: 3rem 1rem;">
+      <div class="btn-spinner" style="display: inline-block; width: 32px; height: 32px; border-width: 3px; border-color: #ea580c; border-top-color: transparent; margin-bottom: 1rem;"></div>
+      <h4 style="font-size: 1.15rem; color: #271f18; margin-bottom: 0.5rem;">Synthesizing Deterministic Blueprint...</h4>
+      <p style="font-size: 0.88rem; color: #645648; max-width: 480px; margin: 0 auto;">
+        Groq LPU is transforming Praman's measured search queries for <strong>"${escapeHTML(kw.seed)}"</strong> into an editorial outline and FAQ schema.
+      </p>
+    </div>
+  `;
+
+  try {
+    const payload = {
+      seed: kw.seed,
+      language: (currentData && currentData.language) || 'mr',
+      demand: kw.demand,
+      intent: kw.intent,
+      competition_band: kw.competition?.band || null,
+      suggestions: (kw.signals && (kw.signals.discovered || kw.signals.research_candidates)) || []
+    };
+
+    const resp = await fetch('/api/blueprint', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error || `Server responded with ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    currentBlueprintData = data;
+    renderBlueprintModal(kw, data);
+  } catch (err) {
+    console.error('Error generating blueprint:', err);
+    body.innerHTML = `
+      <div style="padding: 2rem; text-align: center; color: #be123c;">
+        <h4>Failed to Generate Blueprint</h4>
+        <p style="font-size: 0.88rem; margin-top: 0.5rem;">${escapeHTML(err.message)}</p>
+        <button type="button" class="btn btn-outline btn-sm" onclick='openBlueprintModal(${JSON.stringify(kw)})' style="margin-top: 1rem;">Try Again</button>
+      </div>
+    `;
+  }
+}
+
+function renderBlueprintModal(kw, bp) {
+  const body = document.getElementById('blueprint-modal-body');
+  if (!body) return;
+
+  const demandStr = kw.demand !== null ? kw.demand.toFixed(3) : '⊥';
+  const compBand = (kw.competition?.band || 'unmeasured').toUpperCase();
+
+  let outlineHtml = '';
+  (bp.outline || []).forEach(sec => {
+    const lvl = sec.level || 'H2';
+    const queries = sec.queries_answered || [];
+    const points = sec.key_points || [];
+
+    outlineHtml += `
+      <div class="blueprint-section-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <h4 style="margin: 0; font-size: 1rem; color: #271f18;"><span style="color: #ea580c; font-weight: 800;">${lvl}</span>: ${escapeHTML(sec.heading)}</h4>
+        </div>
+        ${queries.length > 0 ? `
+          <div style="font-size: 0.78rem; color: #645648; margin-bottom: 8px;">
+            <strong>Answering Praman queries:</strong> ${queries.map(q => `<code style="background: #faf6ee; padding: 2px 5px; border-radius: 4px; margin-right: 4px;">${escapeHTML(q)}</code>`).join('')}
+          </div>
+        ` : ''}
+        <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.86rem; color: #3c2814;">
+          ${points.map(pt => `<li style="margin-bottom: 4px;">${escapeHTML(pt)}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+  });
+
+  let faqHtml = '';
+  (bp.faq || []).forEach(f => {
+    const q = f.question || f.q || '';
+    const a = f.answer || f.a || '';
+    faqHtml += `
+      <div class="blueprint-faq-card">
+        <strong style="color: #271f18; font-size: 0.92rem;">Q: ${escapeHTML(q)}</strong>
+        <p style="margin: 4px 0 0; font-size: 0.86rem; color: #503e2c;">A: ${escapeHTML(a)}</p>
+      </div>
+    `;
+  });
+
+  body.innerHTML = `
+    <!-- Metadata Overview Bar -->
+    <div class="blueprint-meta-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+        <div>
+          <span style="font-size: 0.72rem; font-weight: 700; color: #645648; text-transform: uppercase;">Seed Keyword</span>
+          <h3 style="margin: 2px 0 0; font-size: 1.15rem; color: #271f18;">${escapeHTML(bp.seed)}</h3>
+        </div>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <span class="demand-score-pill demand-high" style="font-size: 0.85rem;">Demand ${demandStr}</span>
+          <span class="badge badge-comp-${(kw.competition?.band || 'unmeasured').toLowerCase()}">${compBand}</span>
+          <span class="badge badge-intent">${escapeHTML(kw.intent)}</span>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 0.88rem; background: #ffffff; padding: 10px 12px; border-radius: 6px; border: 1px solid #ebdccb;">
+        <div><strong>SEO Title Tag:</strong> <code>${escapeHTML(bp.title)}</code></div>
+        <div><strong>Meta Description:</strong> <span style="color: #645648;">${escapeHTML(bp.meta_description)}</span> <small style="color: #948372;">(${bp.meta_description?.length || 0} chars)</small></div>
+        <div><strong>Target Word Count:</strong> ~${bp.target_word_count || 1200} words | <strong>Engine:</strong> Groq LPU (0.0 temp)</div>
+      </div>
+    </div>
+
+    <!-- Editorial Outline Hierarchy -->
+    <div style="margin-bottom: 1.5rem;">
+      <h3 style="font-size: 1rem; color: #271f18; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 6px;">
+        <span>📑</span> Editorial Outline &amp; Heading Hierarchy
+      </h3>
+      ${outlineHtml}
+    </div>
+
+    <!-- FAQ & RankMath Schema Section -->
+    ${faqHtml ? `
+      <div>
+        <h3 style="font-size: 1rem; color: #271f18; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 6px;">
+          <span>❓</span> Frequently Asked Questions (PAA &amp; Schema)
+        </h3>
+        ${faqHtml}
+      </div>
+    ` : ''}
+  `;
+}
+
+/* ==========================================================================
+   Cross-Language Indic Seed Expansion Modal
+   ========================================================================== */
+function setupExpandSeedsEvents() {
+  const expandBtn = document.getElementById('expand-indic-seeds-btn');
+  const modal = document.getElementById('expand-seeds-modal');
+  const closeBtn = document.getElementById('expand-seeds-close');
+  const cancelBtn = document.getElementById('expand-seeds-cancel');
+  const applyBtn = document.getElementById('expand-seeds-apply-btn');
+  const listDiv = document.getElementById('expand-seeds-list');
+  const seedsInput = document.getElementById('seeds-input');
+
+  const closeModal = () => { if (modal) modal.style.display = 'none'; };
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  if (expandBtn) {
+    expandBtn.addEventListener('click', async () => {
+      const currentSeeds = seedsInput.value.trim().split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+      const querySeed = currentSeeds[0] || 'शेती योजना';
+
+      expandBtn.innerHTML = '⚡ Expanding...';
+
+      try {
+        const resp = await fetch('/api/expand-seeds', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            seed: querySeed,
+            language: (currentData && currentData.language) || 'mr'
+          })
+        });
+
+        expandBtn.innerHTML = '🌐 Expand Indic (AI)';
+
+        if (!resp.ok) {
+          throw new Error('Failed to expand seeds');
+        }
+
+        const data = await resp.json();
+        const variants = data.variants || [];
+
+        if (variants.length === 0) {
+          showToast('No variants discovered for this seed');
+          return;
+        }
+
+        listDiv.innerHTML = variants.map((v, i) => `
+          <label style="display: flex; align-items: flex-start; gap: 10px; background: #faf6ee; padding: 10px 12px; border-radius: 8px; border: 1px solid #ebdccb; cursor: pointer;">
+            <input type="checkbox" class="expand-seed-checkbox" value="${escapeHTML(v.seed)}" checked style="margin-top: 3px;">
+            <div>
+              <div style="font-weight: 700; color: #271f18; font-size: 0.92rem;">
+                <span class="badge" style="background:#e5dac9; color:#3c2814; font-size:0.72rem; margin-right:6px;">${v.language.toUpperCase()}</span>
+                ${escapeHTML(v.seed)}
+              </div>
+              <div style="font-size: 0.8rem; color: #645648; margin-top: 2px;">${escapeHTML(v.explanation || '')}</div>
+            </div>
+          </label>
+        `).join('');
+
+        document.querySelectorAll('.modal-backdrop').forEach(m => m.style.display = 'none');
+        modal.style.display = 'flex';
+      } catch (err) {
+        expandBtn.innerHTML = '🌐 Expand Indic (AI)';
+        console.error('Error expanding seeds:', err);
+        showToast('Error discovering Indic variants');
+      }
+    });
+  }
+
+  if (applyBtn) {
+    applyBtn.addEventListener('click', () => {
+      const selected = Array.from(document.querySelectorAll('.expand-seed-checkbox:checked')).map(cb => cb.value.trim());
+      if (selected.length === 0) {
+        showToast('Please select at least one seed');
+        return;
+      }
+
+      const existing = seedsInput.value.trim();
+      const prefix = existing ? existing + '\n' : '';
+      seedsInput.value = prefix + selected.join('\n');
+
+      closeModal();
+      showToast(`✅ Added ${selected.length} authentic search seeds to queue!`);
+      runResearch();
+    });
+  }
+}
+

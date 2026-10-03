@@ -15,6 +15,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from praman.ai import expand_indic_seeds, generate_editorial_blueprint
 from praman.competition import CompetitionIndex, SerpObservation, derive_competition_band
 from praman.config import Mode, Settings
 from praman.languages import LANGUAGES
@@ -191,6 +192,33 @@ try:
             logger.exception("Error processing research request")
             raise HTTPException(status_code=500, detail=str(e))
 
+    @app.post("/api/blueprint")
+    async def post_blueprint(payload: dict[str, Any]) -> dict[str, Any]:
+        try:
+            return generate_editorial_blueprint(
+                seed=payload.get("seed", ""),
+                language=payload.get("language", "mr"),
+                demand=payload.get("demand"),
+                intent=payload.get("intent", "informational"),
+                competition_band=payload.get("competition_band"),
+                suggestions=payload.get("suggestions", []),
+            )
+        except Exception as e:
+            logger.exception("Error generating blueprint")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.post("/api/expand-seeds")
+    async def post_expand_seeds(payload: dict[str, Any]) -> dict[str, Any]:
+        try:
+            variants = expand_indic_seeds(
+                seed=payload.get("seed", ""),
+                source_language=payload.get("language", "mr"),
+            )
+            return {"variants": variants}
+        except Exception as e:
+            logger.exception("Error expanding seeds")
+            raise HTTPException(status_code=500, detail=str(e))
+
 except ImportError:
     # FastAPI is not installed: define app as None
     app = None
@@ -294,15 +322,43 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
 
         def do_POST(self) -> None:
             clean_path = urlparse(self.path).path
+            content_len = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_len).decode("utf-8") if content_len > 0 else "{}"
+            try:
+                payload = json.loads(body) if body else {}
+            except Exception:
+                payload = {}
+
             if clean_path == "/api/research":
-                content_len = int(self.headers.get("Content-Length", 0))
-                body = self.rfile.read(content_len).decode("utf-8")
                 try:
-                    payload = json.loads(body)
                     res = _handle_research_request(payload)
                     self._send_json(res)
                 except Exception as e:
                     logger.exception("Error in POST /api/research")
+                    self._send_json({"error": str(e)}, status=500)
+            elif clean_path == "/api/blueprint":
+                try:
+                    res = generate_editorial_blueprint(
+                        seed=payload.get("seed", ""),
+                        language=payload.get("language", "mr"),
+                        demand=payload.get("demand"),
+                        intent=payload.get("intent", "informational"),
+                        competition_band=payload.get("competition_band"),
+                        suggestions=payload.get("suggestions", []),
+                    )
+                    self._send_json(res)
+                except Exception as e:
+                    logger.exception("Error in POST /api/blueprint")
+                    self._send_json({"error": str(e)}, status=500)
+            elif clean_path == "/api/expand-seeds":
+                try:
+                    variants = expand_indic_seeds(
+                        seed=payload.get("seed", ""),
+                        source_language=payload.get("language", "mr"),
+                    )
+                    self._send_json({"variants": variants})
+                except Exception as e:
+                    logger.exception("Error in POST /api/expand-seeds")
                     self._send_json({"error": str(e)}, status=500)
             else:
                 self.send_error(404, "Endpoint not found")

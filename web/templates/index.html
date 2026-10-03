@@ -102,6 +102,7 @@
           <button type="button" class="preset-btn" data-lang="hi" data-seeds="शेयर बाजार, म्यूचुअल फंड, बचत खाता, लोन">📈 Hindi Finance</button>
           <button type="button" class="preset-btn" data-lang="en" data-seeds="crop insurance, agriculture scheme, weather forecast, tractor subsidy">🌐 English Agri</button>
           <button type="button" class="preset-btn" data-lang="ta" data-seeds="வணக்கம், செலவு, வேலை வாய்ப்பு">🏛️ Tamil General</button>
+          <button type="button" class="preset-btn" id="expand-indic-seeds-btn" style="background: #fff7ed; border-color: #fdba74; color: #c2410c; font-weight: 700;" title="Use Groq AI to find authentic search phrases in Hindi, Marathi, and English">🌐 Expand Indic (AI)</button>
         </div>
       </div>
 
@@ -215,7 +216,7 @@
                 <th data-sort="density" title="Question density (15% weight)">Density (15%) <span class="sort-icon">↕</span></th>
                 <th data-sort="depth" title="Rank depth (10% weight)">Depth (10%) <span class="sort-icon">↕</span></th>
                 <th>SERP Competition <span class="info-tag" title="Human observed: thin / weak / stale">Human</span></th>
-                <th>Research Tree</th>
+                <th>Research &amp; Blueprint</th>
               </tr>
             </thead>
             <tbody id="demand-table-body">
@@ -530,6 +531,54 @@
       </div>
       <div class="modal-body" id="inspector-modal-body">
         <!-- Filled dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Editorial Blueprint Modal (Powered by Groq) -->
+  <div id="blueprint-modal" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="blueprint-modal-title">
+    <div class="modal-card modal-large" style="max-width: 860px; max-height: 90vh;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; font-size: 0.76rem; font-weight: 800; padding: 2px 7px; border-radius: 5px; letter-spacing: 0.05em;">GROQ AI</span>
+          <h3 id="blueprint-modal-title" class="modal-title">Editorial Article Blueprint</h3>
+        </div>
+        <button type="button" class="modal-close-btn" id="blueprint-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body" id="blueprint-modal-body" style="overflow-y: auto;">
+        <!-- Filled dynamically -->
+      </div>
+      <div class="modal-footer" id="blueprint-modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <span style="font-size: 0.78rem; color: #948372;">⚡ Deterministic outline strictly grounded in Praman search data</span>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-outline btn-sm" id="blueprint-copy-schema-btn">📋 Copy FAQ Schema</button>
+          <button type="button" class="btn btn-primary btn-sm" id="blueprint-copy-md-btn">📋 Copy Markdown</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expand Indic Seeds Modal (Powered by Groq) -->
+  <div id="expand-seeds-modal" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="expand-seeds-modal-title">
+    <div class="modal-card" style="max-width: 580px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.2rem;">🌐</span>
+          <h3 id="expand-seeds-modal-title" class="modal-title">Expand Indic &amp; English Search Seeds</h3>
+        </div>
+        <button type="button" class="modal-close-btn" id="expand-seeds-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          Groq AI discovers authentic, colloquial search phrases in <strong>Hindi, Marathi, and English</strong> as real citizens type them into Google. Select which ones to add into your demand measurement queue:
+        </p>
+        <div id="expand-seeds-list" style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto;">
+          <!-- Populated dynamically with checkboxes -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-sm" id="expand-seeds-cancel">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="expand-seeds-apply-btn">Add Selected Seeds to Queue</button>
       </div>
     </div>
   </div>
