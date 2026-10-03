@@ -400,7 +400,7 @@ function openIntentModal(seed) {
       ${items.slice(0, 25).map(item => `
         <div class="intent-candidate-item">
           <span style="font-weight:600;font-size:0.9rem;">${escapeHTML(item)}</span>
-          <button type="button" class="measure-candidate-btn" onclick="measureCandidate('${escapeHTML(item)}')">[+ Measure]</button>
+          <button type="button" class="measure-candidate-btn" data-candidate="${escapeHTML(item)}" onclick="handleMeasureCandidateClick(this)" title="Measure independent demand for this candidate">[+ Measure]</button>
         </div>
       `).join('')}
     `;
@@ -452,7 +452,7 @@ function openTreeModal(seed) {
   let cleanItemsHtml = cleanCands.map(c => `
     <div class="tree-item">
       <span>${escapeHTML(c)}</span>
-      <button type="button" class="measure-candidate-btn" onclick="measureCandidate('${escapeHTML(c)}')">[+ Measure]</button>
+      <button type="button" class="measure-candidate-btn" data-candidate="${escapeHTML(c)}" onclick="handleMeasureCandidateClick(this)" title="Measure independent demand for this candidate">[+ Measure]</button>
     </div>
   `).join('');
 
@@ -463,7 +463,7 @@ function openTreeModal(seed) {
   let rawItemsHtml = rawObs.slice(0, 30).map(r => `
     <div class="tree-item" style="opacity:0.85;">
       <span style="font-size:0.86rem;"><code>${escapeHTML(r)}</code></span>
-      <button type="button" class="btn btn-outline btn-sm" onclick="measureCandidate('${escapeHTML(r)}')">+ Add</button>
+      <button type="button" class="btn btn-outline btn-sm" data-candidate="${escapeHTML(r)}" onclick="handleMeasureCandidateClick(this)" title="Add and measure this observation">+ Add</button>
     </div>
   `).join('');
 
@@ -494,17 +494,89 @@ function openTreeModal(seed) {
   modal.style.display = 'flex';
 }
 
-function measureCandidate(cand) {
+function handleMeasureCandidateClick(btn) {
+  if (!btn) return;
+  const cand = btn.getAttribute('data-candidate');
+  if (cand) {
+    measureCandidate(cand, btn);
+  }
+}
+
+async function measureCandidate(cand, btn = null) {
+  if (!cand) return;
+  cand = cand.trim();
+
+  // If button was passed, show immediate loading feedback
+  if (btn) {
+    btn.disabled = true;
+    btn.setAttribute('data-original-text', btn.innerHTML);
+    btn.innerHTML = '⏳ Measuring...';
+  }
+
   const input = document.getElementById('seeds-input');
   const existing = input.value.split(/[,\n]+/).map(s => s.trim()).filter(Boolean);
-  if (!existing.includes(cand)) {
-    existing.push(cand);
-    input.value = existing.join(', ');
+
+  if (existing.includes(cand)) {
+    showToast(`ℹ️ "${cand}" is already measured. Showing in Demand Table...`);
+    switchToTableTabAndHighlight(cand);
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = btn.getAttribute('data-original-text') || '[+ Measure]';
+    }
+    return;
   }
-  showToast(`Measuring "${cand}"...`);
-  const modals = document.querySelectorAll('.modal-backdrop');
-  modals.forEach(m => m.style.display = 'none');
-  runResearch();
+
+  existing.push(cand);
+  input.value = existing.join(', ');
+
+  showToast(`🌱 Promoting "${cand}" to measured seed...`);
+
+  // Close any open backdrop modal so user isn't stuck behind a popup
+  document.querySelectorAll('.modal-backdrop').forEach(m => m.style.display = 'none');
+
+  try {
+    await runResearch();
+    switchToTableTabAndHighlight(cand);
+    showToast(`✅ "${cand}" measured! See Demand Score & Blueprint below.`);
+  } catch (err) {
+    console.error('Error measuring candidate:', err);
+    showToast(`Error measuring "${cand}": ${err.message}`);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = btn.getAttribute('data-original-text') || '[+ Measure]';
+    }
+  }
+}
+
+function switchToTableTabAndHighlight(seed) {
+  // 1. Activate tab-table in tab bar
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    const isTarget = b.getAttribute('data-tab') === 'tab-table';
+    b.classList.toggle('active', isTarget);
+    b.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  const tablePanel = document.getElementById('tab-table');
+  if (tablePanel) tablePanel.style.display = 'block';
+
+  // 2. Find row in #demand-table-body and highlight
+  setTimeout(() => {
+    const rows = document.querySelectorAll('#demand-table-body tr');
+    let targetRow = null;
+    rows.forEach(r => {
+      if (r.getAttribute('data-seed') === seed) {
+        targetRow = r;
+      }
+    });
+
+    if (targetRow) {
+      targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      targetRow.classList.remove('row-highlight-pulse');
+      void targetRow.offsetWidth; // Trigger reflow
+      targetRow.classList.add('row-highlight-pulse');
+    }
+  }, 120);
 }
 
 /* ==========================================================================
@@ -1109,6 +1181,8 @@ function renderTable() {
 
   kws.forEach(kw => {
     const tr = document.createElement('tr');
+    tr.setAttribute('data-seed', kw.seed);
+    tr.id = `demand-row-${encodeURIComponent(kw.seed)}`;
 
     const dVal = kw.demand !== null ? kw.demand : null;
     let dClass = 'demand-low';
@@ -1248,7 +1322,7 @@ function renderCandidatesView() {
     card.className = 'candidate-card';
     card.innerHTML = `
       <span class="candidate-query-text" title="${escapeHTML(c)}">${escapeHTML(c)}</span>
-      <button type="button" class="measure-candidate-btn" onclick="measureCandidate('${escapeHTML(c)}')">[+ Measure]</button>
+      <button type="button" class="measure-candidate-btn" data-candidate="${escapeHTML(c)}" onclick="handleMeasureCandidateClick(this)" title="Measure independent demand for this candidate">[+ Measure]</button>
     `;
     container.appendChild(card);
   });
@@ -1488,7 +1562,7 @@ function renderTreeCanvas() {
           ${cleanCands.map(c => `
             <div class="tree-item">
               <span class="candidate-query-text" title="${escapeHTML(c)}">${escapeHTML(c)}</span>
-              <button type="button" class="measure-candidate-btn" onclick="measureCandidate('${escapeHTML(c)}')">[+ Measure]</button>
+              <button type="button" class="measure-candidate-btn" data-candidate="${escapeHTML(c)}" onclick="handleMeasureCandidateClick(this)" title="Measure independent demand for this candidate">[+ Measure]</button>
             </div>
           `).join('')}
         </div>
@@ -1510,7 +1584,7 @@ function renderTreeCanvas() {
             ${rawObs.slice(0, 50).map(r => `
               <div class="tree-item" style="background:#fff;">
                 <span style="font-size:0.84rem;"><code>${escapeHTML(r)}</code></span>
-                <button type="button" class="btn btn-outline btn-sm" onclick="measureCandidate('${escapeHTML(r)}')">+ Add</button>
+                <button type="button" class="btn btn-outline btn-sm" data-candidate="${escapeHTML(r)}" onclick="handleMeasureCandidateClick(this)" title="Add and measure this observation">+ Add</button>
               </div>
             `).join('')}
           </div>
