@@ -1139,6 +1139,21 @@ function renderTable() {
   const tbody = document.getElementById('demand-table-body');
   tbody.innerHTML = '';
 
+  // Update header sort indicators
+  document.querySelectorAll('#demand-data-table th[data-sort]').forEach(th => {
+    const col = th.getAttribute('data-sort');
+    const icon = th.querySelector('.sort-icon');
+    if (icon) {
+      if (col === currentSort.column) {
+        icon.textContent = currentSort.direction === 'asc' ? ' ▲' : ' ▼';
+        th.style.color = 'var(--accent-saffron)';
+      } else {
+        icon.textContent = ' ↕';
+        th.style.color = '';
+      }
+    }
+  });
+
   let kws = [...currentData.keywords];
 
   kws.sort((a, b) => {
@@ -1246,10 +1261,17 @@ function renderTable() {
 
 function filterTable(query) {
   const q = query.toLowerCase();
+  let visibleCount = 0;
   document.querySelectorAll('#demand-table-body tr').forEach(tr => {
     const text = tr.innerText.toLowerCase();
-    tr.style.display = text.includes(q) ? '' : 'none';
+    const visible = text.includes(q);
+    tr.style.display = visible ? '' : 'none';
+    if (visible) visibleCount++;
   });
+  const countLabel = document.getElementById('table-row-count');
+  if (countLabel) {
+    countLabel.textContent = `Showing ${visibleCount} seeds`;
+  }
 }
 
 function renderPlanner(planner) {
@@ -1501,8 +1523,9 @@ function renderTreeCanvas() {
   const filterQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
   const selectedSeed = seedFilter ? seedFilter.value : 'all';
 
-  // Populate/sync seed dropdown options if needed
-  if (seedFilter && seedFilter.options.length <= 1) {
+  // Populate/sync seed dropdown options dynamically
+  if (seedFilter) {
+    const currentVal = seedFilter.value;
     seedFilter.innerHTML = '<option value="all">🌱 All Evaluated Seeds</option>';
     kws.forEach(k => {
       const opt = document.createElement('option');
@@ -1511,6 +1534,9 @@ function renderTreeCanvas() {
       opt.textContent = `${k.seed} (${count} candidates)`;
       seedFilter.appendChild(opt);
     });
+    if ([...seedFilter.options].some(o => o.value === currentVal)) {
+      seedFilter.value = currentVal;
+    }
   }
 
   // Filter seeds based on dropdown
