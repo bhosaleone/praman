@@ -11,8 +11,19 @@ let candidateViewMode = 'clean'; // 'clean' or 'raw'
 
 document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
+
+  // Check for URL query params: ?lang=mr&seeds=शेती,हवामान
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramLang = urlParams.get('lang');
+  const paramSeeds = urlParams.get('seeds');
+  const langSelect = document.getElementById('lang-select');
+  if (paramLang && langSelect) {
+    langSelect.value = paramLang;
+  }
   const input = document.getElementById('seeds-input');
-  if (input && !input.value.trim()) {
+  if (paramSeeds && input) {
+    input.value = decodeURIComponent(paramSeeds);
+  } else if (input && !input.value.trim()) {
     input.value = "शेती, हवामान, marathi sheti, पीक विमा";
   }
   runResearch();

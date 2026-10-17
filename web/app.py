@@ -222,6 +222,33 @@ try:
             headers={"Cache-Control": "public, max-age=86400"},
         )
 
+    # Programmatic High-Traffic SEO Pages
+    PAGES_DIR = TEMPLATES_DIR / "pages"
+
+    @app.get("/tools/marathi-keyword-tool", response_class=HTMLResponse)
+    async def get_marathi_tool() -> HTMLResponse:
+        return HTMLResponse(content=(PAGES_DIR / "marathi.html").read_text(encoding="utf-8"))
+
+    @app.get("/tools/hindi-keyword-planner", response_class=HTMLResponse)
+    async def get_hindi_tool() -> HTMLResponse:
+        return HTMLResponse(content=(PAGES_DIR / "hindi.html").read_text(encoding="utf-8"))
+
+    @app.get("/tools/tamil-keyword-research", response_class=HTMLResponse)
+    async def get_tamil_tool() -> HTMLResponse:
+        return HTMLResponse(content=(PAGES_DIR / "tamil.html").read_text(encoding="utf-8"))
+
+    @app.get("/tools/telugu-keyword-finder", response_class=HTMLResponse)
+    async def get_telugu_tool() -> HTMLResponse:
+        return HTMLResponse(content=(PAGES_DIR / "telugu.html").read_text(encoding="utf-8"))
+
+    @app.get("/alternatives/google-keyword-planner-india", response_class=HTMLResponse)
+    async def get_gkp_alt() -> HTMLResponse:
+        return HTMLResponse(content=(PAGES_DIR / "gkp_alternative.html").read_text(encoding="utf-8"))
+
+    @app.get("/tools/indian-commercial-intent-keywords", response_class=HTMLResponse)
+    async def get_commercial_tool() -> HTMLResponse:
+        return HTMLResponse(content=(PAGES_DIR / "commercial_intent.html").read_text(encoding="utf-8"))
+
     @app.get("/api/health")
     async def get_health() -> dict[str, str]:
         return {"status": "ok", "version": "0.1.0"}
@@ -305,7 +332,15 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
 
         def do_HEAD(self) -> None:
             clean_path = urlparse(self.path).path
-            valid_html = ("/", "/index.html")
+            valid_tools = (
+                "/tools/marathi-keyword-tool",
+                "/tools/hindi-keyword-planner",
+                "/tools/tamil-keyword-research",
+                "/tools/telugu-keyword-finder",
+                "/alternatives/google-keyword-planner-india",
+                "/tools/indian-commercial-intent-keywords",
+            )
+            valid_html = ("/", "/index.html") + valid_tools
             valid_json = ("/health", "/api/health", "/api/languages")
             valid_markdown = ("/USER_MANUAL.md", "/manual", "/user-manual", "/LAUNCH_PITCH.md", "/pitch", "/launch-pitch")
             valid_zip = ("/praman-serp-companion.zip", "/download/companion.zip", "/companion.zip")
@@ -363,6 +398,14 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
 
         def do_GET(self) -> None:
             clean_path = urlparse(self.path).path
+            pages_map = {
+                "/tools/marathi-keyword-tool": "marathi.html",
+                "/tools/hindi-keyword-planner": "hindi.html",
+                "/tools/tamil-keyword-research": "tamil.html",
+                "/tools/telugu-keyword-finder": "telugu.html",
+                "/alternatives/google-keyword-planner-india": "gkp_alternative.html",
+                "/tools/indian-commercial-intent-keywords": "commercial_intent.html",
+            }
             if clean_path == "/" or clean_path == "/index.html":
                 index_path = TEMPLATES_DIR / "index.html"
                 with open(index_path, "rb") as f:
@@ -372,6 +415,19 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                 self.send_header("Content-Length", str(len(content)))
                 self.end_headers()
                 self.wfile.write(content)
+            elif clean_path in pages_map:
+                target_path = TEMPLATES_DIR / "pages" / pages_map[clean_path]
+                if target_path.exists():
+                    with open(target_path, "rb") as f:
+                        content = f.read()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "text/html; charset=utf-8")
+                    self.send_header("Cache-Control", "public, max-age=3600")
+                    self.send_header("Content-Length", str(len(content)))
+                    self.end_headers()
+                    self.wfile.write(content)
+                else:
+                    self.send_error(404, "SEO page not found")
             elif clean_path in ("/api/health", "/health"):
                 self._send_json({"status": "ok", "version": "0.1.0"})
             elif clean_path == "/api/languages":
