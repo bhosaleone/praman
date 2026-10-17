@@ -156,7 +156,7 @@ def _handle_research_request(payload: dict[str, Any]) -> dict[str, Any]:
 try:
     from fastapi import FastAPI, HTTPException
     from fastapi.middleware.cors import CORSMiddleware
-    from fastapi.responses import FileResponse, HTMLResponse
+    from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, Response
     from fastapi.staticfiles import StaticFiles
 
     app = FastAPI(title="Praman API", version="0.1.0")
@@ -176,6 +176,51 @@ try:
         index_file = TEMPLATES_DIR / "index.html"
         with open(index_file, "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
+
+    @app.get("/robots.txt", response_class=FileResponse)
+    async def get_robots() -> FileResponse:
+        return FileResponse(
+            STATIC_DIR / "robots.txt",
+            media_type="text/plain; charset=utf-8",
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
+
+    @app.get("/sitemap.xml", response_class=FileResponse)
+    async def get_sitemap() -> FileResponse:
+        return FileResponse(
+            STATIC_DIR / "sitemap.xml",
+            media_type="application/xml; charset=utf-8",
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
+
+    @app.get("/favicon.ico", response_class=FileResponse)
+    async def get_favicon() -> FileResponse:
+        return FileResponse(
+            STATIC_DIR / "favicon.ico",
+            media_type="image/x-icon",
+            headers={"Cache-Control": "public, max-age=604800"},
+        )
+
+    @app.get("/favicon.svg", response_class=FileResponse)
+    async def get_favicon_svg() -> FileResponse:
+        return FileResponse(
+            STATIC_DIR / "favicon.svg",
+            media_type="image/svg+xml",
+            headers={"Cache-Control": "public, max-age=604800"},
+        )
+
+    @app.get("/praman-serp-companion.zip", response_class=FileResponse)
+    @app.get("/download/companion.zip", response_class=FileResponse)
+    async def get_companion_zip() -> FileResponse:
+        zip_path = STATIC_DIR / "praman-serp-companion.zip"
+        if not zip_path.exists():
+            zip_path = PROJECT_ROOT / "praman-serp-companion.zip"
+        return FileResponse(
+            zip_path,
+            media_type="application/zip",
+            filename="praman-serp-companion.zip",
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
 
     @app.get("/api/health")
     async def get_health() -> dict[str, str]:
@@ -260,17 +305,61 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
 
         def do_HEAD(self) -> None:
             clean_path = urlparse(self.path).path
-            if clean_path in ("/", "/index.html"):
+            valid_html = ("/", "/index.html")
+            valid_json = ("/health", "/api/health", "/api/languages")
+            valid_markdown = ("/USER_MANUAL.md", "/manual", "/user-manual", "/LAUNCH_PITCH.md", "/pitch", "/launch-pitch")
+            valid_zip = ("/praman-serp-companion.zip", "/download/companion.zip", "/companion.zip")
+
+            if clean_path in valid_html:
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
                 self.end_headers()
-            elif clean_path in ("/health", "/api/health"):
+            elif clean_path in valid_json:
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.end_headers()
-            else:
+            elif clean_path == "/robots.txt":
                 self.send_response(200)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.send_header("Cache-Control", "public, max-age=86400")
                 self.end_headers()
+            elif clean_path == "/sitemap.xml":
+                self.send_response(200)
+                self.send_header("Content-Type", "application/xml; charset=utf-8")
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+            elif clean_path == "/favicon.ico":
+                self.send_response(200)
+                self.send_header("Content-Type", "image/x-icon")
+                self.send_header("Cache-Control", "public, max-age=604800")
+                self.end_headers()
+            elif clean_path == "/favicon.svg":
+                self.send_response(200)
+                self.send_header("Content-Type", "image/svg+xml")
+                self.send_header("Cache-Control", "public, max-age=604800")
+                self.end_headers()
+            elif clean_path in valid_zip:
+                self.send_response(200)
+                self.send_header("Content-Type", "application/zip")
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+            elif clean_path in valid_markdown:
+                self.send_response(200)
+                self.send_header("Content-Type", "text/markdown; charset=utf-8")
+                self.end_headers()
+            elif clean_path.startswith("/static/"):
+                rel_path = clean_path[len("/static/"):]
+                target_file = STATIC_DIR / rel_path
+                if target_file.exists() and target_file.is_file():
+                    mime, _ = mimetypes.guess_type(str(target_file))
+                    self.send_response(200)
+                    self.send_header("Content-Type", mime or "application/octet-stream")
+                    self.send_header("Cache-Control", "public, max-age=604800")
+                    self.end_headers()
+                else:
+                    self.send_error(404, "Static file not found")
+            else:
+                self.send_error(404, "Not found")
 
         def do_GET(self) -> None:
             clean_path = urlparse(self.path).path
@@ -290,6 +379,63 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                     code: {"name": spec.name, "native_name": spec.native_name, "script": spec.script}
                     for code, spec in LANGUAGES.items()
                 })
+            elif clean_path == "/robots.txt":
+                robots_path = STATIC_DIR / "robots.txt"
+                content = robots_path.read_bytes() if robots_path.exists() else b"User-agent: *\nAllow: /\nSitemap: https://www.praman.blog/sitemap.xml\n"
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+            elif clean_path == "/sitemap.xml":
+                sitemap_path = STATIC_DIR / "sitemap.xml"
+                content = sitemap_path.read_bytes() if sitemap_path.exists() else b""
+                self.send_response(200)
+                self.send_header("Content-Type", "application/xml; charset=utf-8")
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+            elif clean_path == "/favicon.ico":
+                ico_path = STATIC_DIR / "favicon.ico"
+                if ico_path.exists():
+                    content = ico_path.read_bytes()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "image/x-icon")
+                    self.send_header("Cache-Control", "public, max-age=604800")
+                    self.send_header("Content-Length", str(len(content)))
+                    self.end_headers()
+                    self.wfile.write(content)
+                else:
+                    self.send_error(404, "Favicon not found")
+            elif clean_path == "/favicon.svg":
+                svg_path = STATIC_DIR / "favicon.svg"
+                if svg_path.exists():
+                    content = svg_path.read_bytes()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "image/svg+xml")
+                    self.send_header("Cache-Control", "public, max-age=604800")
+                    self.send_header("Content-Length", str(len(content)))
+                    self.end_headers()
+                    self.wfile.write(content)
+                else:
+                    self.send_error(404, "Favicon SVG not found")
+            elif clean_path in ("/praman-serp-companion.zip", "/download/companion.zip", "/companion.zip"):
+                zip_path = STATIC_DIR / "praman-serp-companion.zip"
+                if not zip_path.exists():
+                    zip_path = PROJECT_ROOT / "praman-serp-companion.zip"
+                if zip_path.exists():
+                    content = zip_path.read_bytes()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/zip")
+                    self.send_header("Content-Disposition", 'attachment; filename="praman-serp-companion.zip"')
+                    self.send_header("Cache-Control", "public, max-age=86400")
+                    self.send_header("Content-Length", str(len(content)))
+                    self.end_headers()
+                    self.wfile.write(content)
+                else:
+                    self.send_error(404, "Companion extension zip not found")
             elif clean_path in ("/USER_MANUAL.md", "/manual", "/user-manual"):
                 manual_path = PROJECT_ROOT / "USER_MANUAL.md"
                 if manual_path.exists():
@@ -323,6 +469,8 @@ def run_stdlib_server(host: str = "0.0.0.0", port: int = 8000) -> None:
                         content = f.read()
                     self.send_response(200)
                     self.send_header("Content-Type", mime or "application/octet-stream")
+                    self.send_header("Cache-Control", "public, max-age=604800")
+                    self.send_header("Access-Control-Allow-Origin", "*")
                     self.send_header("Content-Length", str(len(content)))
                     self.end_headers()
                     self.wfile.write(content)

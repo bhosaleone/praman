@@ -33,7 +33,7 @@ class TestPramanAI(unittest.TestCase):
         mock_urlopen.return_value.__enter__.return_value = mock_response
 
         messages = [{"role": "user", "content": "hello"}]
-        res = _call_groq_chat(messages, model=PRIMARY_MODEL)
+        res = _call_groq_chat(messages, model=PRIMARY_MODEL, api_key="test_dummy_key_12345")
         self.assertEqual(res["title"], "Test Title")
 
     @patch("praman.ai._call_groq_chat")

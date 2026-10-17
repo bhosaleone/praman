@@ -11,9 +11,20 @@ import base64
 import urllib.request
 import urllib.error
 
+import os
+from pathlib import Path
+
 WP_BASE = "https://articles.praman.blog/wp-json"
-EMAIL = "ishrikantbhosale@gmail.com"
-APP_PW = "LsPfxHhYt3mR0mnNachzYcWq"
+EMAIL = os.environ.get("WP_EMAIL", "ishrikantbhosale@gmail.com")
+APP_PW = os.environ.get("WP_APP_PW", "")
+if not APP_PW:
+    _env_file = Path(__file__).resolve().parent.parent / ".env"
+    if _env_file.exists():
+        for _l in _env_file.read_text(encoding="utf-8").splitlines():
+            if _l.startswith("WP_APP_PW="):
+                APP_PW = _l.split("=", 1)[1].strip().strip('"').strip("'")
+            elif _l.startswith("WP_EMAIL="):
+                EMAIL = _l.split("=", 1)[1].strip().strip('"').strip("'")
 
 AUTH_STR = f"{EMAIL}:{APP_PW}"
 B64_AUTH = base64.b64encode(AUTH_STR.encode("utf-8")).decode("utf-8")

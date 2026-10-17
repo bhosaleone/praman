@@ -23,3 +23,7 @@ htmlcov/
 
 # Praman cache
 .praman_cache/
+
+# Credentials
+toolcreds.txt
+creds.txt
